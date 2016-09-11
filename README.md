@@ -63,4 +63,3 @@ for some reason, task 'harden sysctl config - remove (containers)' is only execu
 
 BSD 2-clause
 
-
