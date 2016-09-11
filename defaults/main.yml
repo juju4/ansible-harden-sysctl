@@ -1,0 +1,4 @@
+---
+
+harden_sysctl_use_forwarding: false
+

@@ -1,0 +1,83 @@
+---
+
+## centos6 has by default some sysctl values not available in containers
+## 	if not processed first, create errors in following tasks
+## FIXME! ansible sysctl module can't unset from sysctl.conf
+- block:
+    - block:
+        - name: harden sysctl config - remove (containers)
+#          sysctl: name="{{ item }}" sysctl_set=yes state=absent
+          lineinfile: name=/etc/sysctl.conf regexp="^{{ item }}=" state=absent
+          with_items: "{{ harden_sysctl_distribution_remove_containers }}"
+      when: (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "kvm")) and harden_sysctl_distribution_remove_containers is defined and harden_sysctl_distribution_remove_containers != ''
+    - name: harden sysctl config - remove
+#      sysctl: name="{{ item }}" sysctl_set=yes state=absent reload=yes
+      lineinfile: name=/etc/sysctl.conf regexp="^{{ item }}=" state=absent
+      with_items: "{{ harden_sysctl_distribution_remove }}"
+  when: harden_sysctl_distribution_remove is defined and harden_sysctl_distribution_remove != ''
+
+- name: harden sysctl config - network
+  sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
+  with_items:
+    - { n: 'net.ipv4.conf.all.accept_redirects', v: 0 }
+    - { n: 'net.ipv4.conf.all.secure_redirects', v: 0 }
+    - { n: 'net.ipv4.conf.all.accept_source_route', v: 0 }
+    - { n: 'net.ipv4.conf.all.bootp_relay', v: 0 }
+    - { n: 'net.ipv4.conf.all.log_martians', v: 1 }
+    - { n: 'net.ipv4.conf.all.proxy_arp', v: 0 }
+    - { n: 'net.ipv4.conf.all.rp_filter', v: 1 }
+    - { n: 'net.ipv4.conf.all.send_redirects', v: 0 }
+    - { n: 'net.ipv4.conf.default.accept_redirects', v: 0 }
+    - { n: 'net.ipv4.conf.default.secure_redirects', v: 0 }
+    - { n: 'net.ipv4.conf.default.accept_source_route', v: 0 }
+    - { n: 'net.ipv4.conf.default.log_martians', v: 1 }
+    - { n: 'net.ipv4.icmp_echo_ignore_broadcasts', v: 1 }
+    - { n: 'net.ipv4.icmp_ignore_bogus_error_responses', v: 1 }
+#    - { n: 'net.ipv6.conf.all.send_redirects', v: 0 }
+    - { n: 'net.ipv6.conf.all.accept_redirects', v: 0 }
+    - { n: 'net.ipv6.conf.all.accept_source_route', v: 0 }
+    - { n: 'net.ipv6.conf.default.accept_redirects', v: 0 }
+    - { n: 'net.ipv6.conf.default.accept_source_route', v: 0 }
+    - { n: 'net.ipv4.icmp_ratelimit', v: 100 }
+    - { n: 'net.ipv4.icmp_ratemask', v: 88089 }
+    - { n: 'net.ipv4.conf.all.arp_ignore', v: 1 }
+    - { n: 'net.ipv4.conf.all.arp_announce', v: 2 }
+
+- block:
+    - debug: var=ansible_virtualization_type
+    - name: harden sysctl config - network
+      sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
+      with_items:
+        - { n: 'net.ipv4.tcp_rfc1337', v: 1 }
+    - set_fact:
+        kernel_r: "{{ ansible_kernel.split('-')[0] }}"
+    - debug: var=kernel_r
+    ## Note: enterprise distribution impact: Centos6=2.6, Centos7=3.10, Trusty LTS=3.13, Xenial LTS=4.4
+    - name: harden sysctl config - network - RFC5961 linux vuln
+      sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
+      with_items:
+        - { n: 'net.ipv4.tcp_challenge_ack_limit', v: 999999999 }
+    #  when: "{{ kernel_r | version_compare('3.6', '>=') }}" and "{{ kernel_r | version_compare('4.7', '<') }}"
+      when: "{{ kernel_r | version_compare('3.6', '>=') }}"
+    - block:
+        - debug: var=harden_sysctl_distribution
+        - name: harden sysctl config - distribution specific
+          sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
+          with_items: "{{ harden_sysctl_distribution }}"
+      when: harden_sysctl_distribution is defined and harden_sysctl_distribution != "" and harden_sysctl_distribution != 'None' and harden_sysctl_distribution != null
+
+  when: not (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "kvm"))
+
+
+- name: disable forwarding in sysctl config
+  sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
+  with_items:
+    - { n: 'net.ipv4.conf.all.forwarding', v: 0 }
+  when: not (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
+
+- name: disable forwarding in sysctl config - not centos6
+  sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
+  with_items:
+    - { n: 'net.ipv4.conf.all.mc_forwarding', v: 0 }
+  when: not (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding) and ((ansible_os_family == "RedHat" and ansible_distribution_version == '7') or ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu')
+
