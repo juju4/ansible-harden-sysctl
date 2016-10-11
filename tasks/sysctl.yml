@@ -67,7 +67,7 @@
           with_items: "{{ harden_sysctl_distribution }}"
       when: harden_sysctl_distribution is defined and harden_sysctl_distribution != "" and harden_sysctl_distribution != 'None' and harden_sysctl_distribution != null
 
-  when: not (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "kvm"))
+  when: not (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker"))
 
 
 - block:
