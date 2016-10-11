@@ -40,6 +40,7 @@
     - { n: 'net.ipv6.conf.default.accept_source_route', v: 0 }
     - { n: 'net.ipv4.icmp_ratelimit', v: 100 }
     - { n: 'net.ipv4.icmp_ratemask', v: 88089 }
+## https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt
     - { n: 'net.ipv4.conf.all.arp_ignore', v: 1 }
     - { n: 'net.ipv4.conf.all.arp_announce', v: 2 }
 
@@ -69,15 +70,27 @@
   when: not (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "kvm"))
 
 
-- name: disable forwarding in sysctl config
-  sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
-  with_items:
-    - { n: 'net.ipv4.conf.all.forwarding', v: 0 }
+- block:
+    - name: disable forwarding in sysctl config
+      sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
+      with_items:
+        - { n: 'net.ipv4.conf.all.forwarding', v: 0 }
+    - name: disable forwarding in sysctl config - not centos6
+      sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
+      with_items:
+        - { n: 'net.ipv4.conf.all.mc_forwarding', v: 0 }
+      when: ((ansible_os_family == "RedHat" and ansible_distribution_version == '7') or ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu')
   when: not (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
+- block:
+    - name: enable forwarding in sysctl config
+      sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
+      with_items:
+        - { n: 'net.ipv4.conf.all.forwarding', v: 1 }
+    - name: enable forwarding in sysctl config - not centos6
+      sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
+      with_items:
+        - { n: 'net.ipv4.conf.all.mc_forwarding', v: 1 }
+      when: ((ansible_os_family == "RedHat" and ansible_distribution_version == '7') or ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu')
+  when: (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
 
-- name: disable forwarding in sysctl config - not centos6
-  sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
-  with_items:
-    - { n: 'net.ipv4.conf.all.mc_forwarding', v: 0 }
-  when: not (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding) and ((ansible_os_family == "RedHat" and ansible_distribution_version == '7') or ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu')
 
