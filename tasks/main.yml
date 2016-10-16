@@ -1,6 +1,7 @@
 ---
 
-- fail: msg="This role is only compatible with Linux"
+- name: Compatibility check
+  fail: msg="This role is only compatible with Linux"
   when: ansible_system != 'Linux'
 
 - name: Include version-specific variables for Ubuntu.

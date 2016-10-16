@@ -50,7 +50,8 @@
       sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
       with_items:
         - { n: 'net.ipv4.tcp_rfc1337', v: 1 }
-    - set_fact:
+    - name: get kernel version
+      set_fact:
         kernel_r: "{{ ansible_kernel.split('-')[0] }}"
     - debug: var=kernel_r
     ## Note: enterprise distribution impact: Centos6=2.6, Centos7=3.10, Trusty LTS=3.13, Xenial LTS=4.4
