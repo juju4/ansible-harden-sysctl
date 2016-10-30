@@ -2,3 +2,12 @@
 
 harden_sysctl_use_forwarding: false
 
+## Take care! afterboot is probably safer for user stations
+## https://lwn.net/Articles/413952/
+## https://linux-audit.com/increase-kernel-integrity-with-disabled-linux-kernel-modules-loading/
+## http://turbochaos.blogspot.ca/2013/10/writing-linux-rootkits-301_31.html
+harden_sysctl_kernel_modules_disabled_sysctl: false
+harden_sysctl_kernel_modules_disabled_afterboot: true
+hardensysctl_kernel_modules:
+  - sysdig_probe
+
