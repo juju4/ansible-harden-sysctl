@@ -55,12 +55,17 @@
       sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
       with_items:
         - { n: 'net.ipv4.conf.all.forwarding', v: 0 }
+        - { n: 'net.ipv4.ip_forward', v: 0 }
+## Alpine/travis/docker: failed: [localhost] (item={u'n': u'net.ipv4.conf.all.forwarding', u'v': 0}) => {"failed": true, "item": {"n": "net.ipv4.conf.all.forwarding", "v": 0}, "msg": "setting net.ipv4.conf.all.forwarding failed: sysctl: error setting key 'net.ipv4.conf.all.forwarding': Read-only file system\n"}
+      ignore_errors: true
   when: not (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
 - block:
     - name: enable forwarding in sysctl config
       sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
       with_items:
         - { n: 'net.ipv4.conf.all.forwarding', v: 1 }
+        - { n: 'net.ipv4.ip_forward', v: 1 }
+      ignore_errors: true
   when: (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
 
 - name: harden sysctl config - ptrace
