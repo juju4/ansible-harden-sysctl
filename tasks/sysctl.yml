@@ -10,7 +10,7 @@
 #          sysctl: name="{{ item }}" sysctl_set=yes state=absent
           lineinfile: name=/etc/sysctl.conf regexp="^{{ item }}=" state=absent
           with_items: "{{ harden_sysctl_distribution_remove_containers }}"
-      when: (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "kvm")) and harden_sysctl_distribution_remove_containers is defined and harden_sysctl_distribution_remove_containers != ''
+      when: (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")) and harden_sysctl_distribution_remove_containers is defined and harden_sysctl_distribution_remove_containers != ''
     - name: harden sysctl config - remove
 #      sysctl: name="{{ item }}" sysctl_set=yes state=absent reload=yes
       lineinfile: name=/etc/sysctl.conf regexp="^{{ item }}=" state=absent
@@ -44,11 +44,9 @@
           sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
           with_items: "{{ harden_sysctl_distribution }}"
       when: harden_sysctl_distribution is defined and harden_sysctl_distribution != "" and harden_sysctl_distribution != 'None' and harden_sysctl_distribution != null
-## FIXME! exclude kvm because lxc/digitalocean misidentified - ansible v2.2
+## Note: exclude kvm because lxc/digitalocean misidentified - ansible < v2.2
 ##	https://github.com/ansible/ansible/issues/17030
-  when: not (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker" or ansible_virtualization_type == "kvm"))
-#  when: not (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker"))
-
+  when: not (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker"))
 
 - block:
     - name: disable forwarding in sysctl config
@@ -72,18 +70,18 @@
   sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
   with_items:
     - { n: 'kernel.yama.ptrace_scope', v: 1 }
-## FIXME! exclude kvm because lxc/digitalocean misidentified - ansible v2.2
-  when: not (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker" or ansible_virtualization_type == "kvm")) or ansible_distribution_release == 'xenial'
-#  when: not (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")) or ansible_distribution_release == 'xenial'
+  when: not (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")) or ansible_distribution_release == 'xenial'
 
 - name: disable kernel modules loading completely
   sysctl: name="kernel.modules_disabled" value=1 sysctl_set=yes state=present reload=yes
   when: harden_sysctl_kernel_modules_disabled_sysctl is defined and harden_sysctl_kernel_modules_disabled_sysctl
 
 - block:
-    - name: disable kernel modules loading now
-      sysctl: name="kernel.modules_disabled" value=1 state=present
-      when: not (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker" or ansible_virtualization_type == "kvm")) or ansible_distribution == 'Ubuntu'
+#    - name: disable kernel modules loading now
+### only changed value in file
+##      sysctl: name="kernel.modules_disabled" value=1 state=present
+#      sysctl: name="kernel.modules_disabled" value=1 state=absent sysctl_set=yes
+#      when: not (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")) or ansible_distribution == 'Ubuntu'
     - name: disable kernel modules loading after initial boot
       blockinfile:
         dest: /etc/rc.local
@@ -91,7 +89,7 @@
           sleep 60
           {% if hardensysctl_kernel_modules is defined and hardensysctl_kernel_modules != [] %}
           {% for mod in hardensysctl_kernel_modules %}
-          insmod {{ mod }}
+          modprobe {{ mod }}
           {% endfor %}
           {% endif %}
           echo 1 > /proc/sys/kernel/modules_disabled

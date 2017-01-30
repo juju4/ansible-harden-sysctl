@@ -6,7 +6,7 @@ before_install:
  - uname -a
  - sudo apt-get update -qq
  - sudo apt-get install -qq python-apt python-pycurl
- - ln -s ansible-harden-sysctl ../harden-sysctl
+ - "[ -f get-dependencies.sh ] && sh -x get-dependencies.sh"
 ## for local travis execution as we use same default.yml than kitchen
  - mkdir /tmp/kitchen
  - ln -s /home/travis/build/juju4/ansible-harden-sysctl/test/integration/default/tmp /tmp/kitchen/tmp
