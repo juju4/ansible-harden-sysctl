@@ -70,7 +70,7 @@
   sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
   with_items:
     - { n: 'kernel.yama.ptrace_scope', v: 1 }
-  when: not (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")) or ansible_distribution_release == 'xenial'
+  when: (not (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")) or ansible_distribution_release == 'xenial') and ansible_architecture != "armv6l"
 
 - name: disable kernel modules loading completely
   sysctl: name="kernel.modules_disabled" value=1 sysctl_set=yes state=present reload=yes
