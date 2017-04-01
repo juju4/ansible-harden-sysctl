@@ -66,11 +66,12 @@
       ignore_errors: true
   when: (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
 
+## Fedora22+: https://bugzilla.redhat.com/show_bug.cgi?id=1196825
 - name: harden sysctl config - ptrace
   sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
   with_items:
     - { n: 'kernel.yama.ptrace_scope', v: 1 }
-  when: (not (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")) or ansible_distribution_release == 'xenial') and ansible_architecture != "armv6l"
+  when: not ((ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")) or (ansible_os_family == "RedHat" and (ansible_distribution_version.split('.')[0]|int <=7)) or (ansible_distribution == 'Debian' and ansible_architecture != "armv6l")) or ansible_distribution_release == 'xenial'
 
 - name: disable kernel modules loading completely
   sysctl: name="kernel.modules_disabled" value=1 sysctl_set=yes state=present reload=yes
