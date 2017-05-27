@@ -43,7 +43,7 @@
         - name: harden sysctl config - distribution specific
           sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
           with_items: "{{ harden_sysctl_distribution }}"
-      when: harden_sysctl_distribution is defined and harden_sysctl_distribution != "" and harden_sysctl_distribution != 'None' and harden_sysctl_distribution != null
+      when: harden_sysctl_distribution is defined and harden_sysctl_distribution != "" and harden_sysctl_distribution != 'None'
 ## Note: exclude kvm because lxc/digitalocean misidentified - ansible < v2.2
 ##	https://github.com/ansible/ansible/issues/17030
   when: not (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker"))
