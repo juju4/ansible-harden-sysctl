@@ -11,6 +11,8 @@ Please note some sysctl are ignored/removed inside containers because of securit
 It was tested on the following versions:
  * 1.9
  * 2.0
+ * 2.3
+ * 2.4
 
 ### Operating systems
 
@@ -24,7 +26,7 @@ For example
 ```
 - host: all
   roles:
-    - harden-sysctl
+    - juju4.harden-sysctl
 ```
 
 ## Variables
@@ -42,14 +44,14 @@ Default kitchen config (.kitchen.yml) is lxd-based, while (.kitchen.vagrant.yml)
 Once you ensured all necessary roles are present, You can test with:
 ```
 $ gem install kitchen-ansible kitchen-lxd_cli kitchen-sync kitchen-vagrant
-$ cd /path/to/roles/harden-sysctl
+$ cd /path/to/roles/juju4.harden-sysctl
 $ kitchen verify
 $ kitchen login
 $ KITCHEN_YAML=".kitchen.vagrant.yml" kitchen verify
 ```
 or
 ```
-$ cd /path/to/roles/harden-sysctl/test/vagrant
+$ cd /path/to/roles/juju4.harden-sysctl/test/vagrant
 $ vagrant up
 $ vagrant ssh
 ```
@@ -59,6 +61,7 @@ $ vagrant ssh
 * centos-6 support in lxc/
 for some reason, task 'harden sysctl config - remove (containers)' is only executed correctly on second run and then verified.
 
+* IPv6 sysctl settings have been moved to role juju4.ipv6
 
 ## License
 

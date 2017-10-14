@@ -31,9 +31,9 @@ harden_sysctl_network_settings:
     - { n: 'net.ipv4.icmp_ignore_bogus_error_responses', v: 1 }
 #    - { n: 'net.ipv6.conf.all.send_redirects', v: 0 }
 #    - { n: 'net.ipv6.conf.all.accept_redirects', v: 0 }
-    - { n: 'net.ipv6.conf.all.accept_source_route', v: 0 }
+#    - { n: 'net.ipv6.conf.all.accept_source_route', v: 0 }
 #    - { n: 'net.ipv6.conf.default.accept_redirects', v: 0 }
-    - { n: 'net.ipv6.conf.default.accept_source_route', v: 0 }
+#    - { n: 'net.ipv6.conf.default.accept_source_route', v: 0 }
 #    - { n: 'net.ipv4.icmp_ratelimit', v: 100 }
 #    - { n: 'net.ipv4.icmp_ratemask', v: 88089 }
 ## https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt
