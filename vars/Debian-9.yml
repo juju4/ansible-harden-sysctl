@@ -48,7 +48,7 @@ harden_sysctl_network_settings:
     - { n: 'net.ipv4.conf.all.arp_ignore', v: 1 }
     - { n: 'net.ipv4.conf.all.arp_announce', v: 2 }
 ## RFC 1337 - TIME-WAIT Assassination Hazards in TCP
-    - { n: 'net.ipv4.tcp_rfc1337', v: 1 }
+#    - { n: 'net.ipv4.tcp_rfc1337', v: 1 }
     - { n: 'net.ipv4.ip_local_port_range', v: '32768 65535' }
 
 harden_sysctl_distribution_remove:
