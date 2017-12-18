@@ -25,9 +25,13 @@ env:
 #    init: /sbin/init
 #    run_opts: ""
   - distribution: alpine
-    version: 3.6
+    version: 3.7
     init: /sbin/init
     run_opts: ""
+  - distribution: debian
+    version: 9
+    init: /lib/systemd/systemd
+    run_opts: "'--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro'"
 
 services:
   - docker
