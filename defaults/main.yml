@@ -27,6 +27,13 @@ hardensysctl_kernel_modules:
   - xt_conntrack
   - x_tables
   - xt_tcpudp
+# if you use nat, postrouting, lxd-bridge...
+  - iptable_nat
+  - iptable_mangle
+  - ipt_MASQUERADE
+  - nf_nat_masquerade_ipv4
+  - xt_CHECKSUM
+  - xt_comment
 #  - ip6_tables
 #  - ip6table_filter
 #  - ip6t_REJECT
