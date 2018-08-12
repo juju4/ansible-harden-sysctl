@@ -37,7 +37,7 @@
       with_items:
         - { n: 'net.ipv4.tcp_challenge_ack_limit', v: 999999999 }
     #  when: "{{ kernel_r | version_compare('3.6', '>=') }}" and "{{ kernel_r | version_compare('4.7', '<') }}"
-      when: kernel_r | version_compare('3.6', '>=')
+      when: kernel_r is version_compare('3.6', '>=')
     - block:
         - debug: var=harden_sysctl_distribution
         - name: harden sysctl config - distribution specific
