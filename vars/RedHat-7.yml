@@ -55,4 +55,3 @@ harden_sysctl_distribution_remove_containers:
 #    - kernel.msgmax
 #    - kernel.shmmax
 #    - kernel.shmall
-

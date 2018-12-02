@@ -19,4 +19,3 @@
   when: ansible_os_family == "Alpine"
 
 - include: sysctl.yml
-

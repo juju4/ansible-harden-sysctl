@@ -2,29 +2,47 @@
 ## https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt
 
 ## centos6 has by default some sysctl values not available in containers. fails on first run, works on second???
-## 	if not processed first, create errors in following tasks
+##  if not processed first, create errors in following tasks
 ## FIXME! ansible sysctl module can't unset from sysctl.conf
 - block:
     - block:
         - name: harden sysctl config - remove (containers)
-#          sysctl: name="{{ item }}" sysctl_set=yes state=absent
-          lineinfile: name=/etc/sysctl.conf regexp="^{{ item }}=" state=absent
+          lineinfile:
+            name: /etc/sysctl.conf
+            regexp: "^{{ item }}="
+            state: absent
           with_items: "{{ harden_sysctl_distribution_remove_containers }}"
-      when: (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")) and harden_sysctl_distribution_remove_containers is defined and harden_sysctl_distribution_remove_containers != ''
+      when: >
+        (ansible_virtualization_type is defined and
+          (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")
+        ) and harden_sysctl_distribution_remove_containers is defined and
+        harden_sysctl_distribution_remove_containers
     - name: harden sysctl config - remove
-#      sysctl: name="{{ item }}" sysctl_set=yes state=absent reload=yes
-      lineinfile: name=/etc/sysctl.conf regexp="^{{ item }}=" state=absent
+      lineinfile:
+        name: /etc/sysctl.conf
+        regexp: "^{{ item }}="
+        state: absent
       with_items: "{{ harden_sysctl_distribution_remove }}"
-  when: harden_sysctl_distribution_remove is defined and harden_sysctl_distribution_remove != ''
+  when: harden_sysctl_distribution_remove is defined and harden_sysctl_distribution_remove
 
 - name: harden sysctl config - network
-  sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
+  sysctl:
+    name: "{{ item.n }}"
+    value: "{{ item.v }}"
+    sysctl_set: yes
+    state: present
+    reload: yes
   with_items: "{{ harden_sysctl_network_settings }}"
 
 - block:
     - debug: var=ansible_virtualization_type
     - name: harden sysctl config - network
-      sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
+      sysctl:
+        name: "{{ item.n }}"
+        value: "{{ item.v }}"
+        sysctl_set: yes
+        state: present
+        reload: yes
       with_items:
         - { n: 'net.ipv4.tcp_rfc1337', v: 1 }
     - name: get kernel version
@@ -33,7 +51,12 @@
     - debug: var=kernel_r
     ## Note: enterprise distribution impact: Centos6=2.6, Centos7=3.10, Trusty LTS=3.13, Xenial LTS=4.4
     - name: harden sysctl config - network - RFC5961 linux vuln
-      sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
+      sysctl:
+        name: "{{ item.n }}"
+        value: "{{ item.v }}"
+        sysctl_set: yes
+        state: present
+        reload: yes
       with_items:
         - { n: 'net.ipv4.tcp_challenge_ack_limit', v: 999999999 }
     #  when: "{{ kernel_r | version_compare('3.6', '>=') }}" and "{{ kernel_r | version_compare('4.7', '<') }}"
@@ -41,25 +64,44 @@
     - block:
         - debug: var=harden_sysctl_distribution
         - name: harden sysctl config - distribution specific
-          sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
+          sysctl:
+            name: "{{ item.n }}"
+            value: "{{ item.v }}"
+            sysctl_set: yes
+            state: present
+            reload: yes
           with_items: "{{ harden_sysctl_distribution }}"
-      when: harden_sysctl_distribution is defined and harden_sysctl_distribution != "" and harden_sysctl_distribution != 'None'
+      when: >
+        harden_sysctl_distribution is defined and harden_sysctl_distribution and
+        harden_sysctl_distribution != 'None'
 ## Note: exclude kvm because lxc/digitalocean misidentified - ansible < v2.2
-##	https://github.com/ansible/ansible/issues/17030
-  when: not (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker"))
+##  https://github.com/ansible/ansible/issues/17030
+  when: >
+    not (ansible_virtualization_type is defined and
+          (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")
+        )
 
 - block:
     - name: disable forwarding in sysctl config
-      sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
+      sysctl:
+        name: "{{ item.n }}"
+        value: "{{ item.v }}"
+        sysctl_set: yes
+        state: present
+        reload: yes
       with_items:
         - { n: 'net.ipv4.conf.all.forwarding', v: 0 }
         - { n: 'net.ipv4.ip_forward', v: 0 }
-## Alpine/travis/docker: failed: [localhost] (item={u'n': u'net.ipv4.conf.all.forwarding', u'v': 0}) => {"failed": true, "item": {"n": "net.ipv4.conf.all.forwarding", "v": 0}, "msg": "setting net.ipv4.conf.all.forwarding failed: sysctl: error setting key 'net.ipv4.conf.all.forwarding': Read-only file system\n"}
       ignore_errors: true
   when: not (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
 - block:
     - name: enable forwarding in sysctl config
-      sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
+      sysctl:
+        name: "{{ item.n }}"
+        value: "{{ item.v }}"
+        sysctl_set: yes
+        state: present
+        reload: yes
       with_items:
         - { n: 'net.ipv4.conf.all.forwarding', v: 1 }
         - { n: 'net.ipv4.ip_forward', v: 1 }
@@ -68,10 +110,23 @@
 
 ## Fedora22+: https://bugzilla.redhat.com/show_bug.cgi?id=1196825
 - name: harden sysctl config - ptrace
-  sysctl: name="{{ item.n }}" value="{{ item.v }}" sysctl_set=yes state=present reload=yes
+  sysctl:
+    name: "{{ item.n }}"
+    value: "{{ item.v }}"
+    sysctl_set: yes
+    state: present
+    reload: yes
   with_items:
     - { n: 'kernel.yama.ptrace_scope', v: 1 }
-  when: not ((ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")) or (ansible_os_family == "RedHat" and (ansible_distribution_version.split('.')[0]|int <=7)) or (ansible_distribution == 'Debian' and ansible_architecture != "armv6l")) or ansible_distribution_release == 'xenial'
+  when: >
+    not ((ansible_virtualization_type is defined and
+          (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")
+        ) or (
+          ansible_os_family == "RedHat" and
+          (ansible_distribution_version.split('.')[0]|int <=7)
+        ) or (
+          ansible_distribution == 'Debian' and ansible_architecture != "armv6l")
+        ) or ansible_distribution_release == 'xenial'
 
 - name: disable kernel modules loading completely
   sysctl: name="kernel.modules_disabled" value=1 sysctl_set=yes state=present reload=yes
@@ -82,7 +137,10 @@
 ### only changed value in file
 ##      sysctl: name="kernel.modules_disabled" value=1 state=present
 #      sysctl: name="kernel.modules_disabled" value=1 state=absent sysctl_set=yes
-#      when: not (ansible_virtualization_type is defined and (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")) or ansible_distribution == 'Ubuntu'
+#      when: >
+#        not (ansible_virtualization_type is defined and
+#              (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")
+#            ) or ansible_distribution == 'Ubuntu'
     - name: disable kernel modules loading after initial boot
       blockinfile:
         dest: /etc/rc.local
@@ -101,4 +159,3 @@
       service: name=rc-local enabled=yes
       when: ansible_service_mgr == 'systemd'
   when: harden_sysctl_kernel_modules_disabled_afterboot is defined and harden_sysctl_kernel_modules_disabled_afterboot
-

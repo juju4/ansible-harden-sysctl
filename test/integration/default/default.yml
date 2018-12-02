@@ -6,4 +6,3 @@
 #    - a:
   roles:
     - juju4.harden-sysctl
-

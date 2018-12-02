@@ -1,5 +1,6 @@
 ---
 galaxy_info:
+  role_name: harden-sysctl
   author: juju4
   description: harden linux sysctl settings
   license: BSD
@@ -27,4 +28,3 @@ galaxy_info:
   - system
   - security
 dependencies: []
-
