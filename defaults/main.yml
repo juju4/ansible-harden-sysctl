@@ -60,4 +60,3 @@ hardensysctl_kernel_modules:
 #  - pvpanic
 #  - kvm
 #  - kvm_intel
-
