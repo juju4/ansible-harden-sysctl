@@ -5,4 +5,4 @@
 #  vars:
 #    - a:
   roles:
-    - juju4.harden-sysctl
+    - juju4.harden_sysctl
