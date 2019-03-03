@@ -60,3 +60,5 @@ hardensysctl_kernel_modules:
 #  - pvpanic
 #  - kvm
 #  - kvm_intel
+## openwall lkrg
+#    - p_lkrg p_init_log_level=3
