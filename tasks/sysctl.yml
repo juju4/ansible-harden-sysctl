@@ -33,6 +33,8 @@
     state: present
     reload: yes
   with_items: "{{ harden_sysctl_network_settings }}"
+  when: >
+    not (ansible_virtualization_type is defined and ansible_virtualization_type == "docker")
 
 - block:
     - debug: var=ansible_virtualization_type
