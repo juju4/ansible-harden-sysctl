@@ -11,6 +11,7 @@ harden_sysctl_kernel_modules_disabled_afterboot: true
 ## minimal iptables modules + sysdig
 hardensysctl_kernel_modules:
   - sysdig_probe
+  - falco-probe
   - ip_tables
   - iptable_filter
   - nf_log_ipv4
