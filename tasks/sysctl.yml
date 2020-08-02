@@ -128,7 +128,7 @@
           (ansible_distribution_version.split('.')[0]|int <=7)
         ) or (
           ansible_distribution == 'Debian' and ansible_architecture != "armv6l")
-        ) or ansible_distribution_release == 'xenial'
+        )
 
 - name: disable kernel modules loading completely
   sysctl: name="kernel.modules_disabled" value=1 sysctl_set=yes state=present reload=yes
