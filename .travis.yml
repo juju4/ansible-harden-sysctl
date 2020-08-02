@@ -3,10 +3,11 @@
 sudo: required
 
 env:
-#  - distribution: centos
-#    version: 6
-#    init: /sbin/init
-#    run_opts: ""
+  - distribution: centos
+    version: 8
+    run_opts: "'--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro'"
+    ansible_version: 2.9.7
+    ansible_extra_vars: ""
   - distribution: centos
     version: 7
     init: /usr/lib/systemd/systemd
@@ -31,17 +32,6 @@ env:
     run_opts: "'--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro'"
     ansible_version: 2.9.7
     ansible_extra_vars: ""
-  - distribution: ubuntu
-    version: 14.04
-    init: /sbin/init
-    run_opts: ""
-    ansible_version: 2.9.7
-    ansible_extra_vars: ""
-## ansible2.4 requires python-cryptography, not available
-#  - distribution: ubuntu
-#    version: 12.04
-#    init: /sbin/init
-#    run_opts: ""
   - distribution: alpine
     version: 3.9
     init: /sbin/init
@@ -56,18 +46,18 @@ env:
     ansible_extra_vars: ""
 # past ansible version
   - distribution: ubuntu
-    version: 16.04
+    version: 20.04
     init: /lib/systemd/systemd
     run_opts: "'--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro'"
     ansible_version: 2.8.10
     ansible_extra_vars: ""
 # upcoming ansible version
-#  - distribution: ubuntu
-#    version: 16.04
-#    init: /lib/systemd/systemd
-#    run_opts: "'--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro'"
-#    ansible_version: 2.5.0b2
-#    ansible_extra_vars: ""
+  - distribution: ubuntu
+    version: 20.04
+    init: /lib/systemd/systemd
+    run_opts: "'--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro'"
+    ansible_version: 2.10.0a7
+    ansible_extra_vars: ""
 
 services:
   - docker
