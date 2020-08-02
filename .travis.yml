@@ -17,7 +17,7 @@ install:
   - pip install molecule docker ansible-lint flake8 testinfra
 
 before_script:
-  - cd ../ && mv ansible-harden-sysctl juju4.sleuthkit
+  - cd ../ && mv ansible-harden-sysctl juju4.harden_sysctl
   - cd juju4.harden_sysctl
 
 script:
