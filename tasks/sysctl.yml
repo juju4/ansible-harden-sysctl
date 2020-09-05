@@ -156,6 +156,7 @@
           echo 1 > /proc/sys/kernel/modules_disabled
         marker: "## {mark} ANSIBLE MANAGED BLOCK: kernel modules disabled"
         insertbefore: '^exit 0'
+        mode: '0644'
         create: yes
     - name: enabling rc.local with systemd
       service: name=rc-local enabled=yes
