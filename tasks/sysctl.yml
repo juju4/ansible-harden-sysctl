@@ -171,5 +171,5 @@
             mode: '0644'
         - name: enabling rc.local with systemd
           service: name=rc-local enabled=yes
-      when: ansible_service_mgr == 'systemd'
+      when: ansible_service_mgr == 'systemd' and ansible_os_family == "Debian"
   when: harden_sysctl_kernel_modules_disabled_afterboot is defined and harden_sysctl_kernel_modules_disabled_afterboot
