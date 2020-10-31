@@ -156,9 +156,20 @@
           echo 1 > /proc/sys/kernel/modules_disabled
         marker: "## {mark} ANSIBLE MANAGED BLOCK: kernel modules disabled"
         insertbefore: '^exit 0'
-        mode: '0644'
+        mode: '0755'
         create: yes
-    - name: enabling rc.local with systemd
-      service: name=rc-local enabled=yes
+    - block:
+        - name: Ensure systemd rc-local override directory exists
+          file:
+            path: /etc/systemd/system/rc-local.service.d
+            state: directory
+            mode: '0755'
+        - name: Ensure systemd rc-local has an install section
+          template:
+            src: systemd-rc-local.conf.j2
+            dest: /etc/systemd/system/rc-local.service.d/install.conf
+            mode: '0644'
+        - name: enabling rc.local with systemd
+          service: name=rc-local enabled=yes
       when: ansible_service_mgr == 'systemd'
   when: harden_sysctl_kernel_modules_disabled_afterboot is defined and harden_sysctl_kernel_modules_disabled_afterboot
