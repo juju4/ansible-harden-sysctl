@@ -22,3 +22,18 @@
     assert:
       that: item.stdout.find(item.item.n + " = " + item.item.v|string) != -1
     with_items: "{{ sysctl.results }}"
+  - name: Check properties of /etc/rc.local
+    stat:
+      path: /etc/rc.local
+    register: rclocalp
+  - name: Validate /etc/rc.local properties
+    assert:
+      that: rclocalp.stat.mode == '0755'
+  - name: Fetch content of /etc/rc.local
+    slurp:
+      src: /etc/rc.local
+    register: rclocal
+  - name: Validate /etc/rc.local
+    assert:
+      that: >
+        "'modprobe ' in rclocal['content'] | b64decode and 'echo 1 > /proc/sys/kernel/modules_disabled' in rclocal['content'] | b64decode"
