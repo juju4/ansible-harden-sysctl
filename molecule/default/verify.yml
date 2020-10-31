@@ -29,6 +29,7 @@
   - name: Validate /etc/rc.local properties
     assert:
       that: rclocalp.stat.mode == '0755'
+    when: ansible_service_mgr == 'systemd' and ansible_os_family == "Debian"
   - name: Fetch content of /etc/rc.local
     slurp:
       src: /etc/rc.local
