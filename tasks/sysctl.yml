@@ -149,7 +149,6 @@
         dest: /etc/rc.local
         mode: '0755'
         owner: root
-        create: yes
     - block:
         - name: Ensure systemd rc-local override directory exists
           file:
