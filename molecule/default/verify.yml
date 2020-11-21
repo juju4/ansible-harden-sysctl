@@ -37,4 +37,4 @@
   - name: Validate /etc/rc.local
     assert:
       that: >
-        "'modprobe ' in rclocal['content'] | b64decode and 'echo 1 > /proc/sys/kernel/modules_disabled' in rclocal['content'] | b64decode"
+        "'#!/bin/sh' in rclocal['content'] | b64decode and 'modprobe ' in rclocal['content'] | b64decode and 'echo 1 > /proc/sys/kernel/modules_disabled' in rclocal['content'] | b64decode"

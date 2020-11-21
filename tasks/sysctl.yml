@@ -144,19 +144,11 @@
 #              (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")
 #            ) or ansible_distribution == 'Ubuntu'
     - name: disable kernel modules loading after initial boot
-      blockinfile:
+      template:
+        src: rc.local.j2
         dest: /etc/rc.local
-        block: |
-          sleep 60
-          {% if hardensysctl_kernel_modules is defined and hardensysctl_kernel_modules != [] %}
-          {% for mod in hardensysctl_kernel_modules %}
-          modprobe {{ mod }}
-          {% endfor %}
-          {% endif %}
-          echo 1 > /proc/sys/kernel/modules_disabled
-        marker: "## {mark} ANSIBLE MANAGED BLOCK: kernel modules disabled"
-        insertbefore: '^exit 0'
         mode: '0755'
+        owner: root
         create: yes
     - block:
         - name: Ensure systemd rc-local override directory exists
