@@ -1,5 +1,5 @@
-[![Build Status - Master](https://travis-ci.org/juju4/ansible-harden-sysctl.svg?branch=master)](https://travis-ci.org/juju4/ansible-harden-sysctl)
-[![Build Status - Devel](https://travis-ci.org/juju4/ansible-harden-sysctl.svg?branch=devel)](https://travis-ci.org/juju4/ansible-harden-sysctl/branches)
+[![Build Status - Master](https://travis-ci.com/juju4/ansible-harden-sysctl.svg?branch=master)](https://travis-ci.com/juju4/ansible-harden-sysctl)
+[![Build Status - Devel](https://travis-ci.com/juju4/ansible-harden-sysctl.svg?branch=devel)](https://travis-ci.com/juju4/ansible-harden-sysctl/branches)
 # Linux Kernel settings/sysctl hardening ansible role
 
 Ansible role to harden linux sysctl settings
