@@ -1,5 +1,9 @@
 [![Build Status - Master](https://travis-ci.com/juju4/ansible-harden-sysctl.svg?branch=master)](https://travis-ci.com/juju4/ansible-harden-sysctl)
 [![Build Status - Devel](https://travis-ci.com/juju4/ansible-harden-sysctl.svg?branch=devel)](https://travis-ci.com/juju4/ansible-harden-sysctl/branches)
+
+[![Actions Status - Master](https://github.com/juju4/ansible-harden-sysctl/workflows/AnsibleCI/badge.svg)](https://github.com/juju4/ansible-harden-sysctl/actions?query=branch%3Amaster)
+[![Actions Status - Devel](https://github.com/juju4/ansible-harden-sysctl/workflows/AnsibleCI/badge.svg?branch=devel)](https://github.com/juju4/ansible-harden-sysctl/actions?query=branch%3Adevel)
+
 # Linux Kernel settings/sysctl hardening ansible role
 
 Ansible role to harden linux sysctl settings
@@ -13,10 +17,11 @@ It was tested on the following versions:
  * 2.0
  * 2.3
  * 2.4
+ * 2.10
 
 ### Operating systems
 
-Tested with vagrant on Ubuntu 14.04, Kitchen test with trusty and centos7
+Tested on Ubuntu 16.04, 18.04 and 20.04, Centos 7 and 8.
 
 ## Example Playbook
 
@@ -66,4 +71,3 @@ for some reason, task 'harden sysctl config - remove (containers)' is only execu
 ## License
 
 BSD 2-clause
-
