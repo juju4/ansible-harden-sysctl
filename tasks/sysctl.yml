@@ -9,7 +9,7 @@
         - name: harden sysctl config - remove (containers)
           lineinfile:
             name: /etc/sysctl.conf
-            regexp: "^{{ item }}="
+            regexp: "^{{ item }}="
             state: absent
           with_items: "{{ harden_sysctl_distribution_remove_containers }}"
       when: >
@@ -20,7 +20,7 @@
     - name: harden sysctl config - remove
       lineinfile:
         name: /etc/sysctl.conf
-        regexp: "^{{ item }}="
+        regexp: "^{{ item }}="
         state: absent
       with_items: "{{ harden_sysctl_distribution_remove }}"
   when: harden_sysctl_distribution_remove is defined and harden_sysctl_distribution_remove
