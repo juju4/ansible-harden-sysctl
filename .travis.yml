@@ -2,15 +2,39 @@
 language: python
 services: docker
 
+jobs:
+  include:
+    - stage: ansible-lint
+      name: Ansible Lint
+      before_install:
+        - pip3 install ansible-lint
+      script:
+        - ansible-lint tasks/main.yml || true
+      after_script: true
+    - stage: deploy
+      name: Deploy on Ubuntu Focal
+      env:
+        - MOLECULE_DISTRO: ubuntu:20.04
+    - stage: deployalt
+      name: Deploy on Centos 8
+      env:
+        - MOLECULE_DISTRO: centos:8
+    - stage: deployalt
+      name: Deploy on Centos 7
+      env:
+        - MOLECULE_DISTRO: centos:7
+    - stage: deployalt
+      name: Deploy on Ubuntu Bionic
+      env:
+        - MOLECULE_DISTRO: ubuntu:18.04
+    - stage: deployalt
+      name: Deploy on Ubuntu Xenial
+      env:
+        - MOLECULE_DISTRO: ubuntu:16.04
+
 env:
   global:
     - MOLECULE_NO_LOG: "false"
-  matrix:
-    - MOLECULE_DISTRO: centos:8
-    - MOLECULE_DISTRO: centos:7
-    - MOLECULE_DISTRO: ubuntu:20.04
-    - MOLECULE_DISTRO: ubuntu:18.04
-    - MOLECULE_DISTRO: ubuntu:16.04
 
 before_install:
   # Upgrade Docker to work with docker-py.
