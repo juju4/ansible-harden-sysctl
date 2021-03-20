@@ -15,8 +15,10 @@
     changed_when: false
     with_items: "{{ sysctl_checks }}"
     register: sysctl
-  - debug: var=sysctl.results
-  - debug:
+  - name: Debug | sysctl output
+    debug: var=sysctl.results
+  - name: Debug | sysctl output first
+    debug:
       msg: "{{ sysctl.results[0] }}"
   - name: Validate sysctl values
     assert:
