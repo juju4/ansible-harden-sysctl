@@ -11,4 +11,3 @@ describe command('sysctl -p') do
   its(:stdout) { should_not match /error: / }
   its(:exit_status) { should eq 0 }
 end
-
