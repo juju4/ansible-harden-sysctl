@@ -14,7 +14,7 @@
           with_items: "{{ harden_sysctl_distribution_remove_containers }}"
       when: >
         (ansible_virtualization_type is defined and
-          (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")
+          (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
         ) and harden_sysctl_distribution_remove_containers is defined and
         harden_sysctl_distribution_remove_containers
     - name: harden sysctl config - remove
@@ -34,7 +34,7 @@
     reload: yes
   with_items: "{{ harden_sysctl_network_settings }}"
   when: >
-    not (ansible_virtualization_type is defined and ansible_virtualization_type == "docker")
+    not (ansible_virtualization_type is defined and ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
 
 - block:
     - name: Debug | ansible_virtualization_type
@@ -83,7 +83,7 @@
 ##  https://github.com/ansible/ansible/issues/17030
   when: >
     not (ansible_virtualization_type is defined and
-          (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")
+          (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
         )
 
 - block:
@@ -97,8 +97,11 @@
       with_items:
         - { n: 'net.ipv4.conf.all.forwarding', v: 0 }
         - { n: 'net.ipv4.ip_forward', v: 0 }
-      ignore_errors: true
-  when: not (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
+  when: >
+    not (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
+    and not (ansible_virtualization_type is defined and
+          (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
+        )
 - block:
     - name: enable forwarding in sysctl config
       sysctl:
@@ -110,8 +113,11 @@
       with_items:
         - { n: 'net.ipv4.conf.all.forwarding', v: 1 }
         - { n: 'net.ipv4.ip_forward', v: 1 }
-      ignore_errors: true
-  when: (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
+  when: >
+    (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
+    and not (ansible_virtualization_type is defined and
+          (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
+        )
 
 ## Fedora22+: https://bugzilla.redhat.com/show_bug.cgi?id=1196825
 - name: harden sysctl config - ptrace
@@ -125,7 +131,7 @@
     - { n: 'kernel.yama.ptrace_scope', v: 1 }
   when: >
     not ((ansible_virtualization_type is defined and
-          (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")
+          (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
         ) or (
           ansible_os_family == "RedHat" and
           (ansible_distribution_version.split('.')[0]|int <=7)
