@@ -19,4 +19,4 @@
   include_vars: "Alpine.yml"
   when: ansible_os_family == "Alpine"
 
-- include: sysctl.yml
+- import_tasks: sysctl.yml
