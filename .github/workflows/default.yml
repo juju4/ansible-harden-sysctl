@@ -24,7 +24,7 @@ jobs:
           - 'ubuntu:18.04'
           - 'ubuntu:16.04'
     env:
-      ANSIBLE_CALLBACK_WHITELIST: profile_tasks
+      ANSIBLE_CALLBACKS_ENABLED: profile_tasks
       MOLECULE_NO_LOG: "false"
 
     steps:
