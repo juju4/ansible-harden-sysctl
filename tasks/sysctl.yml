@@ -7,7 +7,7 @@
 - block:
     - block:
         - name: harden sysctl config - remove (containers)
-          lineinfile:
+          ansible.builtin.lineinfile:
             name: /etc/sysctl.conf
             regexp: "^{{ item }}="
             state: absent
@@ -18,7 +18,7 @@
         ) and harden_sysctl_distribution_remove_containers is defined and
         harden_sysctl_distribution_remove_containers
     - name: harden sysctl config - remove
-      lineinfile:
+      ansible.builtin.lineinfile:
         name: /etc/sysctl.conf
         regexp: "^{{ item }}="
         state: absent
@@ -38,7 +38,7 @@
 
 - block:
     - name: Debug | ansible_virtualization_type
-      debug: var=ansible_virtualization_type
+      ansible.builtin.debug: var=ansible_virtualization_type
     - name: harden sysctl config - network
       sysctl:
         name: "{{ item.n }}"
@@ -49,10 +49,10 @@
       with_items:
         - { n: 'net.ipv4.tcp_rfc1337', v: 1 }
     - name: get kernel version
-      set_fact:
+      ansible.builtin.set_fact:
         kernel_r: "{{ ansible_kernel.split('-')[0] }}"
     - name: Debug | kernel release
-      debug: var=kernel_r
+      ansible.builtin.debug: var=kernel_r
     ## Note: enterprise distribution impact: Centos6=2.6, Centos7=3.10, Trusty LTS=3.13, Xenial LTS=4.4
     - name: harden sysctl config - network - RFC5961 linux vuln
       sysctl:
@@ -67,7 +67,7 @@
       when: kernel_r is version_compare('3.6', '>=')
     - block:
         - name: Debug | harden_sysctl_distribution
-          debug: var=harden_sysctl_distribution
+          ansible.builtin.debug: var=harden_sysctl_distribution
         - name: harden sysctl config - distribution specific
           sysctl:
             name: "{{ item.n }}"
@@ -153,19 +153,19 @@
 #              (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")
 #            ) or ansible_distribution == 'Ubuntu'
     - name: disable kernel modules loading after initial boot
-      template:
+      ansible.builtin.template:
         src: rc.local.j2
         dest: /etc/rc.local
         mode: '0755'
         owner: root
     - block:
         - name: Ensure systemd rc-local override directory exists
-          file:
+          ansible.builtin.file:
             path: /etc/systemd/system/rc-local.service.d
             state: directory
             mode: '0755'
         - name: Ensure systemd rc-local has an install section
-          template:
+          ansible.builtin.template:
             src: systemd-rc-local.conf.j2
             dest: /etc/systemd/system/rc-local.service.d/install.conf
             mode: '0644'
