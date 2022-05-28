@@ -4,8 +4,10 @@
 ## centos6 has by default some sysctl values not available in containers. fails on first run, works on second???
 ##  if not processed first, create errors in following tasks
 ## FIXME! ansible sysctl module can't unset from sysctl.conf
-- block:
-    - block:
+- name: absent
+  block:
+    - name: Container
+      block:
         - name: harden sysctl config - remove (containers)
           ansible.builtin.lineinfile:
             name: /etc/sysctl.conf
@@ -36,7 +38,8 @@
   when: >
     not (ansible_virtualization_type is defined and ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
 
-- block:
+- name: Not container
+  block:
     - name: Debug | ansible_virtualization_type
       ansible.builtin.debug: var=ansible_virtualization_type
     - name: harden sysctl config - network
@@ -65,7 +68,8 @@
         - { n: 'net.ipv4.tcp_challenge_ack_limit', v: 999999999 }
     #  when: "{{ kernel_r | version_compare('3.6', '>=') }}" and "{{ kernel_r | version_compare('4.7', '<') }}"
       when: kernel_r is version_compare('3.6', '>=')
-    - block:
+    - name: Distribution
+      block:
         - name: Debug | harden_sysctl_distribution
           ansible.builtin.debug: var=harden_sysctl_distribution
         - name: harden sysctl config - distribution specific
@@ -86,7 +90,8 @@
           (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
         )
 
-- block:
+- name: Network forwarding disabled
+  block:
     - name: disable forwarding in sysctl config
       sysctl:
         name: "{{ item.n }}"
@@ -102,7 +107,8 @@
     and not (ansible_virtualization_type is defined and
           (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
         )
-- block:
+- name: Network forwarding enabled
+  block:
     - name: enable forwarding in sysctl config
       sysctl:
         name: "{{ item.n }}"
@@ -143,7 +149,8 @@
   sysctl: name="kernel.modules_disabled" value=1 sysctl_set=yes state=present reload=yes
   when: harden_sysctl_kernel_modules_disabled_sysctl is defined and harden_sysctl_kernel_modules_disabled_sysctl
 
-- block:
+- name: after boot
+  block:
 #    - name: disable kernel modules loading now
 ### only changed value in file
 ##      sysctl: name="kernel.modules_disabled" value=1 state=present
@@ -158,7 +165,8 @@
         dest: /etc/rc.local
         mode: '0755'
         owner: root
-    - block:
+    - name: Debian systemd
+      block:
         - name: Ensure systemd rc-local override directory exists
           ansible.builtin.file:
             path: /etc/systemd/system/rc-local.service.d
