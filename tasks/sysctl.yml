@@ -1,8 +1,6 @@
 ---
 ## https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt
 
-## centos6 has by default some sysctl values not available in containers. fails on first run, works on second???
-##  if not processed first, create errors in following tasks
 ## FIXME! ansible sysctl module can't unset from sysctl.conf
 - name: absent
   block:
@@ -56,7 +54,6 @@
         kernel_r: "{{ ansible_kernel.split('-')[0] }}"
     - name: Debug | kernel release
       ansible.builtin.debug: var=kernel_r
-    ## Note: enterprise distribution impact: Centos6=2.6, Centos7=3.10, Trusty LTS=3.13, Xenial LTS=4.4
     - name: harden sysctl config - network - RFC5961 linux vuln
       sysctl:
         name: "{{ item.n }}"
