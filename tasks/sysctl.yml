@@ -2,11 +2,11 @@
 ## https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt
 
 ## FIXME! ansible sysctl module can't unset from sysctl.conf
-- name: absent
+- name: Absent
   block:
     - name: Container
       block:
-        - name: harden sysctl config - remove (containers)
+        - name: Harden sysctl config - remove (containers)
           ansible.builtin.lineinfile:
             name: /etc/sysctl.conf
             regexp: "^{{ item }}="
@@ -17,7 +17,7 @@
           (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
         ) and harden_sysctl_distribution_remove_containers is defined and
         harden_sysctl_distribution_remove_containers
-    - name: harden sysctl config - remove
+    - name: Harden sysctl config - remove
       ansible.builtin.lineinfile:
         name: /etc/sysctl.conf
         regexp: "^{{ item }}="
@@ -25,7 +25,7 @@
       with_items: "{{ harden_sysctl_distribution_remove }}"
   when: harden_sysctl_distribution_remove is defined and harden_sysctl_distribution_remove
 
-- name: harden sysctl config - network
+- name: Harden sysctl config - network
   sysctl:
     name: "{{ item.n }}"
     value: "{{ item.v }}"
@@ -40,7 +40,7 @@
   block:
     - name: Debug | ansible_virtualization_type
       ansible.builtin.debug: var=ansible_virtualization_type
-    - name: harden sysctl config - network
+    - name: Harden sysctl config - network
       sysctl:
         name: "{{ item.n }}"
         value: "{{ item.v }}"
@@ -49,12 +49,12 @@
         reload: yes
       with_items:
         - { n: 'net.ipv4.tcp_rfc1337', v: 1 }
-    - name: get kernel version
+    - name: Get kernel version
       ansible.builtin.set_fact:
         kernel_r: "{{ ansible_kernel.split('-')[0] }}"
     - name: Debug | kernel release
       ansible.builtin.debug: var=kernel_r
-    - name: harden sysctl config - network - RFC5961 linux vuln
+    - name: Harden sysctl config - network - RFC5961 linux vuln
       sysctl:
         name: "{{ item.n }}"
         value: "{{ item.v }}"
@@ -69,7 +69,7 @@
       block:
         - name: Debug | harden_sysctl_distribution
           ansible.builtin.debug: var=harden_sysctl_distribution
-        - name: harden sysctl config - distribution specific
+        - name: Harden sysctl config - distribution specific
           sysctl:
             name: "{{ item.n }}"
             value: "{{ item.v }}"
@@ -89,7 +89,7 @@
 
 - name: Network forwarding disabled
   block:
-    - name: disable forwarding in sysctl config
+    - name: Disable forwarding in sysctl config
       sysctl:
         name: "{{ item.n }}"
         value: "{{ item.v }}"
@@ -106,7 +106,7 @@
         )
 - name: Network forwarding enabled
   block:
-    - name: enable forwarding in sysctl config
+    - name: Enable forwarding in sysctl config
       sysctl:
         name: "{{ item.n }}"
         value: "{{ item.v }}"
@@ -123,7 +123,7 @@
         )
 
 ## Fedora22+: https://bugzilla.redhat.com/show_bug.cgi?id=1196825
-- name: harden sysctl config - ptrace
+- name: Harden sysctl config - ptrace
   sysctl:
     name: "{{ item.n }}"
     value: "{{ item.v }}"
@@ -142,11 +142,11 @@
           ansible_distribution == 'Debian' and ansible_architecture != "armv6l")
         )
 
-- name: disable kernel modules loading completely
+- name: Disable kernel modules loading completely
   sysctl: name="kernel.modules_disabled" value=1 sysctl_set=yes state=present reload=yes
   when: harden_sysctl_kernel_modules_disabled_sysctl is defined and harden_sysctl_kernel_modules_disabled_sysctl
 
-- name: after boot
+- name: After boot
   block:
 #    - name: disable kernel modules loading now
 ### only changed value in file
@@ -156,7 +156,7 @@
 #        not (ansible_virtualization_type is defined and
 #              (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")
 #            ) or ansible_distribution == 'Ubuntu'
-    - name: disable kernel modules loading after initial boot
+    - name: Disable kernel modules loading after initial boot
       ansible.builtin.template:
         src: rc.local.j2
         dest: /etc/rc.local
@@ -174,7 +174,7 @@
             src: systemd-rc-local.conf.j2
             dest: /etc/systemd/system/rc-local.service.d/install.conf
             mode: '0644'
-        - name: enabling rc.local with systemd
+        - name: Enabling rc.local with systemd
           ansible.builtin.service: name=rc-local enabled=yes
       when: ansible_service_mgr == 'systemd' and ansible_os_family == "Debian"
   when: harden_sysctl_kernel_modules_disabled_afterboot is defined and harden_sysctl_kernel_modules_disabled_afterboot
