@@ -4,40 +4,40 @@
   hosts: hardensysctl
   vars:
     sysctl_checks:
-    - { n: 'net.ipv4.tcp_syncookies', v: 1 }
-    - { n: 'fs.suid_dumpable', v: 2 }
-    - { n: 'net.ipv4.conf.all.accept_redirects', v: 0 }
-    # - { n: 'net.ipv4.conf.default.log_martians', v: 1 }
-    - { n: 'net.ipv4.icmp_ratelimit', v: 100 }
+      - { n: 'net.ipv4.tcp_syncookies', v: 1 }
+      - { n: 'fs.suid_dumpable', v: 2 }
+      - { n: 'net.ipv4.conf.all.accept_redirects', v: 0 }
+      # - { n: 'net.ipv4.conf.default.log_martians', v: 1 }
+      - { n: 'net.ipv4.icmp_ratelimit', v: 100 }
   tasks:
-  - name: Check sysctl values
-    ansible.builtin.command: "sysctl {{ item.n }}"
-    changed_when: false
-    with_items: "{{ sysctl_checks }}"
-    register: sysctl
-  - name: Debug | sysctl output
-    ansible.builtin.debug:
-      var: sysctl.results
-  - name: Debug | sysctl output first
-    ansible.builtin.debug:
-      msg: "{{ sysctl.results[0] }}"
-  - name: Validate sysctl values
-    ansible.builtin.assert:
-      that: item.stdout.find(item.item.n + " = " + item.item.v|string) != -1
-    with_items: "{{ sysctl.results }}"
-  - name: Check properties of /etc/rc.local
-    ansible.builtin.stat:
-      path: /etc/rc.local
-    register: rclocalp
-  - name: Validate /etc/rc.local properties
-    ansible.builtin.assert:
-      that: rclocalp.stat.mode == '0755'
-    when: ansible_service_mgr == 'systemd' and ansible_os_family == "Debian"
-  - name: Fetch content of /etc/rc.local
-    ansible.builtin.slurp:
-      src: /etc/rc.local
-    register: rclocal
-  - name: Validate /etc/rc.local
-    ansible.builtin.assert:
-      that: >
-        "'#!/bin/sh' in rclocal['content'] | b64decode and 'modprobe ' in rclocal['content'] | b64decode and 'echo 1 > /proc/sys/kernel/modules_disabled' in rclocal['content'] | b64decode"
+    - name: Check sysctl values
+      ansible.builtin.command: "sysctl {{ item.n }}"
+      changed_when: false
+      with_items: "{{ sysctl_checks }}"
+      register: sysctl
+    - name: Debug | sysctl output
+      ansible.builtin.debug:
+        var: sysctl.results
+    - name: Debug | sysctl output first
+      ansible.builtin.debug:
+        msg: "{{ sysctl.results[0] }}"
+    - name: Validate sysctl values
+      ansible.builtin.assert:
+        that: item.stdout.find(item.item.n + " = " + item.item.v|string) != -1
+      with_items: "{{ sysctl.results }}"
+    - name: Check properties of /etc/rc.local
+      ansible.builtin.stat:
+        path: /etc/rc.local
+      register: rclocalp
+    - name: Validate /etc/rc.local properties
+      ansible.builtin.assert:
+        that: rclocalp.stat.mode == '0755'
+      when: ansible_service_mgr == 'systemd' and ansible_os_family == "Debian"
+    - name: Fetch content of /etc/rc.local
+      ansible.builtin.slurp:
+        src: /etc/rc.local
+      register: rclocal
+    - name: Validate /etc/rc.local
+      ansible.builtin.assert:
+        that: >
+          "'#!/bin/sh' in rclocal['content'] | b64decode and 'modprobe ' in rclocal['content'] | b64decode and 'echo 1 > /proc/sys/kernel/modules_disabled' in rclocal['content'] | b64decode"

@@ -28,7 +28,7 @@ hardensysctl_kernel_modules:
   - xt_conntrack
   - x_tables
   - xt_tcpudp
-# if you use nat, postrouting, lxd-bridge...
+  # if you use nat, postrouting, lxd-bridge...
   - iptable_nat
   - iptable_mangle
   - ipt_MASQUERADE

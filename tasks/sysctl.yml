@@ -69,7 +69,7 @@
         reload: yes
       with_items:
         - { n: 'net.ipv4.tcp_challenge_ack_limit', v: 999999999 }
-    #  when: "{{ kernel_r | version_compare('3.6', '>=') }}" and "{{ kernel_r | version_compare('4.7', '<') }}"
+      # when: "{{ kernel_r | version_compare('3.6', '>=') }}" and "{{ kernel_r | version_compare('4.7', '<') }}"
       when: kernel_r is version_compare('3.6', '>=')
     - name: Distribution
       when: >
@@ -161,14 +161,14 @@
 - name: After boot
   when: harden_sysctl_kernel_modules_disabled_afterboot is defined and harden_sysctl_kernel_modules_disabled_afterboot
   block:
-#    - name: disable kernel modules loading now
-### only changed value in file
-##      ansible.posix.sysctl: name="kernel.modules_disabled" value=1 state=present
-#      ansible.posix.sysctl: name="kernel.modules_disabled" value=1 state=absent sysctl_set=yes
-#      when: >
-#        not (ansible_virtualization_type is defined and
-#              (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")
-#            ) or ansible_distribution == 'Ubuntu'
+    # - name: disable kernel modules loading now
+    ### only changed value in file
+    ##   ansible.posix.sysctl: name="kernel.modules_disabled" value=1 state=present
+    #   ansible.posix.sysctl: name="kernel.modules_disabled" value=1 state=absent sysctl_set=yes
+    #   when: >
+    #     not (ansible_virtualization_type is defined and
+    #          (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")
+    #     ) or ansible_distribution == 'Ubuntu'
     - name: Disable kernel modules loading after initial boot
       ansible.builtin.template:
         src: rc.local.j2

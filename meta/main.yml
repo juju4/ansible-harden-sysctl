@@ -11,19 +11,19 @@ galaxy_info:
   # platform on this list, let us know and we'll get it added!
   #
   platforms:
-  - name: EL
-    versions:
-     - all
-  - name: Ubuntu
-    versions:
-    - bionic
-    - focal
-    - jammy
+    - name: EL
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - bionic
+        - focal
+        - jammy
   #
   # Below are all categories currently available. Just as with
   # the platforms above, uncomment those that apply to your role.
   #
   galaxy_tags:
-  - system
-  - security
+    - system
+    - security
 dependencies: []
