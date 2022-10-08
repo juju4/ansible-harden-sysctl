@@ -3,8 +3,14 @@
 
 ## FIXME! ansible sysctl module can't unset from sysctl.conf
 - name: Absent
+  when: harden_sysctl_distribution_remove is defined and harden_sysctl_distribution_remove
   block:
     - name: Container
+      when: >
+        (ansible_virtualization_type is defined and
+          (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
+        ) and harden_sysctl_distribution_remove_containers is defined and
+        harden_sysctl_distribution_remove_containers
       block:
         - name: Harden sysctl config - remove (containers)
           ansible.builtin.lineinfile:
@@ -12,21 +18,15 @@
             regexp: "^{{ item }}="
             state: absent
           with_items: "{{ harden_sysctl_distribution_remove_containers }}"
-      when: >
-        (ansible_virtualization_type is defined and
-          (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
-        ) and harden_sysctl_distribution_remove_containers is defined and
-        harden_sysctl_distribution_remove_containers
     - name: Harden sysctl config - remove
       ansible.builtin.lineinfile:
         name: /etc/sysctl.conf
         regexp: "^{{ item }}="
         state: absent
       with_items: "{{ harden_sysctl_distribution_remove }}"
-  when: harden_sysctl_distribution_remove is defined and harden_sysctl_distribution_remove
 
 - name: Harden sysctl config - network
-  sysctl:
+  ansible.posix.sysctl:
     name: "{{ item.n }}"
     value: "{{ item.v }}"
     sysctl_set: yes
@@ -37,11 +37,16 @@
     not (ansible_virtualization_type is defined and ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
 
 - name: Not container
+  when: >
+    not (ansible_virtualization_type is defined and
+          (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
+        )
   block:
     - name: Debug | ansible_virtualization_type
-      ansible.builtin.debug: var=ansible_virtualization_type
+      ansible.builtin.debug:
+        var: ansible_virtualization_type
     - name: Harden sysctl config - network
-      sysctl:
+      ansible.posix.sysctl:
         name: "{{ item.n }}"
         value: "{{ item.v }}"
         sysctl_set: yes
@@ -53,9 +58,10 @@
       ansible.builtin.set_fact:
         kernel_r: "{{ ansible_kernel.split('-')[0] }}"
     - name: Debug | kernel release
-      ansible.builtin.debug: var=kernel_r
+      ansible.builtin.debug:
+        var: kernel_r
     - name: Harden sysctl config - network - RFC5961 linux vuln
-      sysctl:
+      ansible.posix.sysctl:
         name: "{{ item.n }}"
         value: "{{ item.v }}"
         sysctl_set: yes
@@ -66,31 +72,33 @@
     #  when: "{{ kernel_r | version_compare('3.6', '>=') }}" and "{{ kernel_r | version_compare('4.7', '<') }}"
       when: kernel_r is version_compare('3.6', '>=')
     - name: Distribution
+      when: >
+        harden_sysctl_distribution is defined and harden_sysctl_distribution and
+        harden_sysctl_distribution != 'None'
       block:
         - name: Debug | harden_sysctl_distribution
-          ansible.builtin.debug: var=harden_sysctl_distribution
+          ansible.builtin.debug:
+            var: harden_sysctl_distribution
         - name: Harden sysctl config - distribution specific
-          sysctl:
+          ansible.posix.sysctl:
             name: "{{ item.n }}"
             value: "{{ item.v }}"
             sysctl_set: yes
             state: present
             reload: yes
           with_items: "{{ harden_sysctl_distribution }}"
-      when: >
-        harden_sysctl_distribution is defined and harden_sysctl_distribution and
-        harden_sysctl_distribution != 'None'
 ## Note: exclude kvm because lxc/digitalocean misidentified - ansible < v2.2
 ##  https://github.com/ansible/ansible/issues/17030
-  when: >
-    not (ansible_virtualization_type is defined and
-          (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
-        )
 
 - name: Network forwarding disabled
+  when: >
+    not (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
+    and not (ansible_virtualization_type is defined and
+          (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
+        )
   block:
     - name: Disable forwarding in sysctl config
-      sysctl:
+      ansible.posix.sysctl:
         name: "{{ item.n }}"
         value: "{{ item.v }}"
         sysctl_set: yes
@@ -99,15 +107,15 @@
       with_items:
         - { n: 'net.ipv4.conf.all.forwarding', v: 0 }
         - { n: 'net.ipv4.ip_forward', v: 0 }
+- name: Network forwarding enabled
   when: >
-    not (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
+    (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
     and not (ansible_virtualization_type is defined and
           (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
         )
-- name: Network forwarding enabled
   block:
     - name: Enable forwarding in sysctl config
-      sysctl:
+      ansible.posix.sysctl:
         name: "{{ item.n }}"
         value: "{{ item.v }}"
         sysctl_set: yes
@@ -116,15 +124,10 @@
       with_items:
         - { n: 'net.ipv4.conf.all.forwarding', v: 1 }
         - { n: 'net.ipv4.ip_forward', v: 1 }
-  when: >
-    (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
-    and not (ansible_virtualization_type is defined and
-          (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
-        )
 
 ## Fedora22+: https://bugzilla.redhat.com/show_bug.cgi?id=1196825
 - name: Harden sysctl config - ptrace
-  sysctl:
+  ansible.posix.sysctl:
     name: "{{ item.n }}"
     value: "{{ item.v }}"
     sysctl_set: yes
@@ -134,7 +137,11 @@
     - { n: 'kernel.yama.ptrace_scope', v: 1 }
   when: >
     not ((ansible_virtualization_type is defined and
-          (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
+          (ansible_virtualization_type == "lxc"
+           or ansible_virtualization_type == "docker"
+           or ansible_virtualization_type == "containerd"
+           or ansible_virtualization_type == "container"
+          )
         ) or (
           ansible_os_family == "RedHat" and
           (ansible_distribution_version.split('.')[0]|int <=7)
@@ -143,15 +150,21 @@
         )
 
 - name: Disable kernel modules loading completely
-  sysctl: name="kernel.modules_disabled" value=1 sysctl_set=yes state=present reload=yes
+  ansible.posix.sysctl:
+    name: "kernel.modules_disabled"
+    value: 1
+    sysctl_set: yes
+    state: present
+    reload: yes
   when: harden_sysctl_kernel_modules_disabled_sysctl is defined and harden_sysctl_kernel_modules_disabled_sysctl
 
 - name: After boot
+  when: harden_sysctl_kernel_modules_disabled_afterboot is defined and harden_sysctl_kernel_modules_disabled_afterboot
   block:
 #    - name: disable kernel modules loading now
 ### only changed value in file
-##      sysctl: name="kernel.modules_disabled" value=1 state=present
-#      sysctl: name="kernel.modules_disabled" value=1 state=absent sysctl_set=yes
+##      ansible.posix.sysctl: name="kernel.modules_disabled" value=1 state=present
+#      ansible.posix.sysctl: name="kernel.modules_disabled" value=1 state=absent sysctl_set=yes
 #      when: >
 #        not (ansible_virtualization_type is defined and
 #              (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker")
@@ -163,6 +176,7 @@
         mode: '0755'
         owner: root
     - name: Debian systemd
+      when: ansible_service_mgr == 'systemd' and ansible_os_family == "Debian"
       block:
         - name: Ensure systemd rc-local override directory exists
           ansible.builtin.file:
@@ -175,6 +189,6 @@
             dest: /etc/systemd/system/rc-local.service.d/install.conf
             mode: '0644'
         - name: Enabling rc.local with systemd
-          ansible.builtin.service: name=rc-local enabled=yes
-      when: ansible_service_mgr == 'systemd' and ansible_os_family == "Debian"
-  when: harden_sysctl_kernel_modules_disabled_afterboot is defined and harden_sysctl_kernel_modules_disabled_afterboot
+          ansible.builtin.service:
+            name: rc-local
+            enabled: yes

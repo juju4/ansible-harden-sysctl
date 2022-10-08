@@ -16,7 +16,8 @@
     with_items: "{{ sysctl_checks }}"
     register: sysctl
   - name: Debug | sysctl output
-    ansible.builtin.debug: var=sysctl.results
+    ansible.builtin.debug:
+      var: sysctl.results
   - name: Debug | sysctl output first
     ansible.builtin.debug:
       msg: "{{ sysctl.results[0] }}"

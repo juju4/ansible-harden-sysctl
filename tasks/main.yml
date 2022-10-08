@@ -1,11 +1,13 @@
 ---
 
 - name: Compatibility check
-  ansible.builtin.fail: msg="This role is only compatible with Linux"
+  ansible.builtin.fail:
+    msg: "This role is only compatible with Linux"
   when: ansible_system != 'Linux'
 
 - name: Debug | ansible_distribution
-  ansible.builtin.debug: var=ansible_distribution
+  ansible.builtin.debug:
+    var: ansible_distribution
 - name: Include version-specific variables for Ubuntu.
   ansible.builtin.include_vars: "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
   when: ansible_distribution == 'Ubuntu'
@@ -19,4 +21,5 @@
   ansible.builtin.include_vars: "Alpine.yml"
   when: ansible_os_family == "Alpine"
 
-- import_tasks: sysctl.yml
+- name: Import sysctl
+  ansible.builtin.import_tasks: sysctl.yml
