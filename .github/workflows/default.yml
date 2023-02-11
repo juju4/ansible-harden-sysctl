@@ -4,12 +4,17 @@ name: AnsibleCI
 on:
   push:
   pull_request:
+  workflow_dispatch:
   schedule:  # run weekly, every monday 03:00
     - cron: '0 3 * * 1'
+
+permissions: {}
 
 jobs:
   build:
 
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.experimental }}
     strategy:
