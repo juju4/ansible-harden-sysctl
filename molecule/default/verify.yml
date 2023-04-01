@@ -9,6 +9,12 @@
       - { n: 'net.ipv4.conf.all.accept_redirects', v: 0 }
       # - { n: 'net.ipv4.conf.default.log_martians', v: 1 }
       - { n: 'net.ipv4.icmp_ratelimit', v: 100 }
+  pre_tasks:
+    - name: RedHat | Ensure sysctl is present
+      ansible.builtin.package:
+        name: procps-ng
+        state: present
+      when: ansible_os_family == "RedHat" and ansible_distribution_major_version | int >= 8
   tasks:
     - name: Check sysctl values
       ansible.builtin.command: "sysctl {{ item.n }}"
