@@ -21,4 +21,6 @@ modprobe {{ mod }}
 
 echo 1 > /proc/sys/kernel/modules_disabled
 
+{{ hardensysctl_kernel_rclocal_extras }}
+
 exit 0

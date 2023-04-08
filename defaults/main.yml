@@ -2,6 +2,8 @@
 
 harden_sysctl_use_forwarding: false
 
+hardensysctl_kernel_rclocal_extras: ''
+
 ## Take care! afterboot is probably safer for user stations
 ## https://lwn.net/Articles/413952/
 ## https://linux-audit.com/increase-kernel-integrity-with-disabled-linux-kernel-modules-loading/
