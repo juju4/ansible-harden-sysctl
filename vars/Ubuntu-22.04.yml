@@ -4,7 +4,7 @@ harden_sysctl_distribution:
   - { n: 'net.ipv4.tcp_syncookies', v: 1 }
   - { n: 'net.ipv4.tcp_timestamps', v: 0 }
   ## https://lwn.net/Articles/420403/
-  - { n: 'kernel.kptr_restrict', v: 1 }
+  - { n: 'kernel.kptr_restrict', v: 2 }
   - { n: 'kernel.core_uses_pid', v: 1 }
   ## 2 - (suidsafe) - any binary which normally not be dumped is dumped readable by root only
   - { n: 'fs.suid_dumpable', v: 2 }
@@ -15,10 +15,14 @@ harden_sysctl_distribution:
   - { n: 'kernel.randomize_va_space', v: 2 }
   - { n: 'fs.protected_symlinks', v: 1 }
   - { n: 'fs.protected_hardlinks', v: 1 }
+  - { n: 'fs.protected_fifos', v: 2 }
+  - { n: 'fs.protected_regular', v: 2 }
   - { n: 'vm.mmap_min_addr', v: 65536 }
   - { n: 'kernel.pid_max', v: "{% if ansible_userspace_bits == '32' %}32768{% else %}65536{% endif %}" }
   ## restrict access to perf subsystem
-  - { n: 'kernel.perf_event_paranoid', v: 2 }
+  # https://docs.kernel.org/admin-guide/perf-security.html?highlight=perf_event_paranoid
+  # https://linuxsecurity.expert/kb/sysctl/kernel_perf_event_paranoid/
+  - { n: 'kernel.perf_event_paranoid', v: 3 }
   - { n: 'kernel.perf_event_max_sample_rate', v: 1 }
   - { n: 'kernel.perf_cpu_time_max_percent', v: 1 }
   ## https://kernsec.org/wiki/index.php/Kernel_Self_Protection_Project/Recommended_Settings
@@ -26,6 +30,8 @@ harden_sysctl_distribution:
   - { n: 'user.max_user_namespaces', v: "{{ harden_sysctl_max_user_namespaces | default('0') }}" }
   - { n: 'kernel.unprivileged_bpf_disabled', v: 1 }
   - { n: 'net.core.bpf_jit_harden', v: 2 }
+  - { n: 'dev.tty.ldisc_autoload', v: 0 }
+  - { n: 'vm.unprivileged_userfaultfd', v: 0 }
 
 harden_sysctl_network_settings:
   - { n: 'net.ipv4.conf.all.accept_redirects', v: 0 }
@@ -42,11 +48,10 @@ harden_sysctl_network_settings:
   - { n: 'net.ipv4.conf.default.log_martians', v: 1 }
   - { n: 'net.ipv4.icmp_echo_ignore_broadcasts', v: 1 }
   - { n: 'net.ipv4.icmp_ignore_bogus_error_responses', v: 1 }
-  # - { n: 'net.ipv6.conf.all.send_redirects', v: 0 }
-  # - { n: 'net.ipv6.conf.all.accept_redirects', v: 0 }
-  # - { n: 'net.ipv6.conf.all.accept_source_route', v: 0 }
-  # - { n: 'net.ipv6.conf.default.accept_redirects', v: 0 }
-  # - { n: 'net.ipv6.conf.default.accept_source_route', v: 0 }
+  - { n: 'net.ipv6.conf.all.accept_redirects', v: 0 }
+  - { n: 'net.ipv6.conf.all.accept_source_route', v: 0 }
+  - { n: 'net.ipv6.conf.default.accept_redirects', v: 0 }
+  - { n: 'net.ipv6.conf.default.accept_source_route', v: 0 }
   - { n: 'net.ipv4.icmp_ratelimit', v: 100 }
   - { n: 'net.ipv4.icmp_ratemask', v: 88089 }
   ## https://www.kernel.org/doc/Documentation/networking/ip-sysctl.txt
