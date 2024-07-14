@@ -15,6 +15,11 @@
         name: procps-ng
         state: present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version | int >= 8
+    - name: Debian | Ensure sysctl is present
+      ansible.builtin.package:
+        name: procps
+        state: present
+      when: ansible_os_family == "Debian"
   tasks:
     - name: Check sysctl values
       ansible.builtin.command: "sysctl {{ item.n }}"
