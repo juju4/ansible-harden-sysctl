@@ -15,6 +15,13 @@
         name: procps-ng
         state: present
       when: ansible_os_family == "RedHat" and ansible_distribution_major_version | int >= 8
+    - name: Debian | update cache
+      ansible.builtin.apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == 'Debian'
+      register: pkg_result
+      until: pkg_result is success
     - name: Debian | Ensure sysctl is present
       ansible.builtin.package:
         name: procps
