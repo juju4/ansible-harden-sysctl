@@ -26,6 +26,8 @@ jobs:
             experimental: false
           - molecule_distro: 'rockylinux:8'
             experimental: false
+          - molecule_distro: 'ubuntu:24.04'
+            experimental: true
           - molecule_distro: 'ubuntu:22.04'
             experimental: true
           - molecule_distro: 'ubuntu:20.04'
@@ -33,6 +35,10 @@ jobs:
           - molecule_distro: 'ubuntu:18.04'
             experimental: false
           - molecule_distro: 'ubuntu:16.04'
+            experimental: false
+          - molecule_distro: 'debian:12'
+            experimental: false
+          - molecule_distro: 'debian:11'
             experimental: false
     env:
       ANSIBLE_CALLBACKS_ENABLED: profile_tasks
