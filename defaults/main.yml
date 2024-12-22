@@ -10,9 +10,8 @@ hardensysctl_kernel_rclocal_extras: ''
 ## http://turbochaos.blogspot.ca/2013/10/writing-linux-rootkits-301_31.html
 harden_sysctl_kernel_modules_disabled_sysctl: false
 harden_sysctl_kernel_modules_disabled_afterboot: true
-## minimal iptables modules + sysdig
+## minimal iptables modules
 hardensysctl_kernel_modules:
-  - sysdig_probe
   - falco
   - ip_tables
   - iptable_filter
@@ -21,6 +20,7 @@ hardensysctl_kernel_modules:
   - nf_conntrack_ipv4
   - nf_defrag_ipv4
   - nf_conntrack
+  - nf_nat
   - xt_multiport
   - xt_conntrack
   - xt_LOG
@@ -66,3 +66,20 @@ hardensysctl_kernel_modules:
 #  - kvm_intel
 ## openwall lkrg
 #    - p_lkrg p_init_log_level=3
+## nftables
+  - nft_ct
+  - nft_chain_nat
+  - nft_conntrack
+  - nft_hash
+  - nft_reject
+  - nft_limit
+  - nft_log
+  - nft_masq
+  - nft_nat
+  - nft_redir
+## iso9660
+  - isofs
+  - br_netfilter
+  - overlay
+  - aufs
+  - ip_vs
