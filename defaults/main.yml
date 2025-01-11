@@ -83,3 +83,5 @@ hardensysctl_kernel_modules:
   - overlay
   - aufs
   - ip_vs
+
+is_container: false

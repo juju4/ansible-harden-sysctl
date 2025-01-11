@@ -7,10 +7,9 @@
   block:
     - name: Container
       when: >
-        (ansible_virtualization_type is defined and
-          (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
-        ) and harden_sysctl_distribution_remove_containers is defined and
-        harden_sysctl_distribution_remove_containers
+        - is_container
+        - harden_sysctl_distribution_remove_containers is defined
+        - harden_sysctl_distribution_remove_containers | bool
       block:
         - name: Harden sysctl config - remove (containers)
           ansible.builtin.lineinfile:
@@ -33,14 +32,12 @@
     state: present
     reload: yes
   with_items: "{{ harden_sysctl_network_settings }}"
-  when: >
-    not (ansible_virtualization_type is defined and ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
+  when:
+    - not is_container
 
 - name: Not container
-  when: >
-    not (ansible_virtualization_type is defined and
-          (ansible_virtualization_type == "lxc" or ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
-        )
+  when:
+    - not is_container
   block:
     - name: Debug | ansible_virtualization_type
       ansible.builtin.debug:
@@ -91,11 +88,9 @@
 ##  https://github.com/ansible/ansible/issues/17030
 
 - name: Network forwarding disabled
-  when: >
-    not (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
-    and not (ansible_virtualization_type is defined and
-          (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
-        )
+  when:
+    - not (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
+    - not is_container
   block:
     - name: Disable forwarding in sysctl config
       ansible.posix.sysctl:
@@ -108,11 +103,9 @@
         - { n: 'net.ipv4.conf.all.forwarding', v: 0 }
         - { n: 'net.ipv4.ip_forward', v: 0 }
 - name: Network forwarding enabled
-  when: >
-    (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
-    and not (ansible_virtualization_type is defined and
-          (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
-        )
+  when:
+    - (harden_sysctl_use_forwarding is defined and harden_sysctl_use_forwarding)
+    - not is_container
   block:
     - name: Enable forwarding in sysctl config
       ansible.posix.sysctl:
@@ -133,6 +126,8 @@
     sysctl_file: "{% if ansible_os_family == 'Debian' %}/etc/sysctl.d/99-allow-ping.conf{% else %}{{ omit }}{% endif %}"
     state: present
     reload: yes
+  when:
+    - not is_container or ansible_distribution == 'Ubuntu'
 
 ## Fedora22+: https://bugzilla.redhat.com/show_bug.cgi?id=1196825
 - name: Harden sysctl config - ptrace
@@ -145,12 +140,8 @@
   with_items:
     - { n: 'kernel.yama.ptrace_scope', v: 1 }
   when: >
-    not ((ansible_virtualization_type is defined and
-          (ansible_virtualization_type == "lxc"
-           or ansible_virtualization_type == "docker"
-           or ansible_virtualization_type == "containerd"
-           or ansible_virtualization_type == "container"
-          )
+    not (
+          is_container
         ) or (
           ansible_os_family == "RedHat" and
           (ansible_distribution_version.split('.')[0]|int <=7)
