@@ -69,7 +69,6 @@ hardensysctl_kernel_modules:
 ## nftables
   - nft_ct
   - nft_chain_nat
-  - nft_conntrack
   - nft_hash
   - nft_reject
   - nft_limit
