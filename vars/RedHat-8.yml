@@ -66,3 +66,5 @@ harden_sysctl_distribution_remove_containers:
 # - kernel.msgmax
 # - kernel.shmmax
 # - kernel.shmall
+
+harden_sysctl_pkgs: procps-ng

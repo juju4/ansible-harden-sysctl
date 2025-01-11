@@ -21,5 +21,10 @@
   ansible.builtin.include_vars: "Alpine.yml"
   when: ansible_os_family == "Alpine"
 
+- name: Ensure sysctl package is present
+  ansible.builtin.package:
+    name: "{{ harden_sysctl_pkgs | default([]) }}"
+    state: present
+
 - name: Import sysctl
   ansible.builtin.import_tasks: sysctl.yml
