@@ -142,11 +142,11 @@
   when: >
     not (
           is_container
-        ) or (
-          ansible_os_family == "RedHat" and
-          (ansible_distribution_version.split('.')[0]|int <=7)
-        ) or (
-          ansible_distribution == 'Debian' and ansible_architecture != "armv6l")
+          or (
+            ansible_os_family == "RedHat" and
+            (ansible_distribution_version.split('.')[0]|int <=7)
+          ) or
+          (ansible_distribution == 'Debian' and ansible_architecture != "armv6l")
         )
 
 - name: Disable kernel modules loading completely
