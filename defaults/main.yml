@@ -1,6 +1,7 @@
 ---
 
 harden_sysctl_use_forwarding: false
+harden_sysctl_ping_group_range: '0  2147483647'
 
 hardensysctl_kernel_rclocal_extras: ''
 

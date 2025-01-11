@@ -125,6 +125,15 @@
         - { n: 'net.ipv4.conf.all.forwarding', v: 1 }
         - { n: 'net.ipv4.ip_forward', v: 1 }
 
+- name: Set limited ping group range
+  ansible.posix.sysctl:
+    name: net.ipv4.ping_group_range
+    value: "{{ harden_sysctl_ping_group_range | default('0  2147483647') }}"
+    sysctl_set: yes
+    sysctl_file: /etc/sysctl.d/99-allow-ping.conf
+    state: present
+    reload: yes
+
 ## Fedora22+: https://bugzilla.redhat.com/show_bug.cgi?id=1196825
 - name: Harden sysctl config - ptrace
   ansible.posix.sysctl:
