@@ -21,6 +21,14 @@
   ansible.builtin.include_vars: "Alpine.yml"
   when: ansible_os_family == "Alpine"
 
+- name: Debian | update cache
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: ansible_os_family == 'Debian'
+  register: pkg_result
+  until: pkg_result is success
+
 - name: Ensure sysctl package is present
   ansible.builtin.package:
     name: "{{ harden_sysctl_pkgs | default([]) }}"
