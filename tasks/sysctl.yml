@@ -130,7 +130,7 @@
     name: net.ipv4.ping_group_range
     value: "{{ harden_sysctl_ping_group_range | default('0  2147483647') }}"
     sysctl_set: yes
-    sysctl_file: /etc/sysctl.d/99-allow-ping.conf
+    sysctl_file: "{% if ansible_os_family == 'Debian' %}/etc/sysctl.d/99-allow-ping.conf{% else %}{{ omit }}{% endif %}"
     state: present
     reload: yes
 
