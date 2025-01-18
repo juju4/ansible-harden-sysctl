@@ -47,7 +47,9 @@ hardensysctl_kernel_modules:
 #  - nf_conntrack_ipv6
 #  - nf_defrag_ipv6
 #  - ipt_REJECT
-#  - nf_reject_ipv4
+  - nf_reject
+  - nf_reject_ipv4
+  - nf_reject_ipv6
 #  - xt_addrtype
 #  - nf_conntrack_broadcast
 # /etc/default/ufw
@@ -72,6 +74,8 @@ hardensysctl_kernel_modules:
   - nft_chain_nat
   - nft_hash
   - nft_reject
+  - nft_reject_ipv4
+  - nft_reject_ipv6
   - nft_limit
   - nft_log
   - nft_masq
