@@ -3,7 +3,9 @@
 
 ## FIXME! ansible sysctl module can't unset from sysctl.conf
 - name: Absent
-  when: harden_sysctl_distribution_remove is defined and harden_sysctl_distribution_remove
+  when:
+    - harden_sysctl_distribution_remove is defined
+    - harden_sysctl_distribution_remove | bool
   block:
     - name: Container
       when: >
