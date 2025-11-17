@@ -57,5 +57,7 @@
       register: rclocal
     - name: Validate /etc/rc.local
       ansible.builtin.assert:
-        that: >
-          "'#!/bin/sh' in rclocal['content'] | b64decode and 'modprobe ' in rclocal['content'] | b64decode and 'echo 1 > /proc/sys/kernel/modules_disabled' in rclocal['content'] | b64decode"
+        that:
+          - "'#!/bin/sh' in rclocal['content'] | b64decode"
+          - "'modprobe ' in rclocal['content'] | b64decode"
+          - "'echo 1 > /proc/sys/kernel/modules_disabled' in rclocal['content'] | b64decode"
