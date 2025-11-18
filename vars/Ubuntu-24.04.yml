@@ -61,10 +61,10 @@ harden_sysctl_network_settings:
   # - { n: 'net.ipv4.tcp_rfc1337', v: 1 }  ## done in sysctl.yml/excluded for containers
   - { n: 'net.ipv4.ip_local_port_range', v: '32768 65535' }
 
-harden_sysctl_distribution_remove:
+harden_sysctl_distribution_remove: false
 
 ## get in lxc: "error: permission denied on key 'kernel.shmmax'"
-harden_sysctl_distribution_remove_containers:
+harden_sysctl_distribution_remove_containers: []
 # - kernel.sysrq
 # - kernel.core_uses_pid
 # - kernel.msgmnb
