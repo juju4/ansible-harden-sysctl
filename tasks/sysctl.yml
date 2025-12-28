@@ -146,7 +146,7 @@
           is_container
           or (
             ansible_facts['os_family'] == "RedHat" and
-            (ansible_facts['distribution_version.split('.''])[0]|int <=7)
+            (ansible_facts['distribution_major_version']|int <=7)
           ) or
           (ansible_facts['distribution'] == 'Debian' and ansible_facts['architecture'] != "armv6l")
         )
