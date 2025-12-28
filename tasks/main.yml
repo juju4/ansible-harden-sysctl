@@ -3,21 +3,21 @@
 - name: Compatibility check
   ansible.builtin.fail:
     msg: "This role is only compatible with Linux"
-  when: ansible_system != 'Linux'
+  when: ansible_facts['system'] != 'Linux'
 
-- name: Debug | ansible_distribution
+- name: Debug | ansible_facts['distribution']
   ansible.builtin.debug:
-    var: ansible_distribution
+    var: ansible_facts['distribution']
 
 - name: Include variables
   ansible.builtin.include_vars: "{{ lookup('ansible.builtin.first_found', params) }}"
   vars:
     params:
       files:
-        - "{{ ansible_distribution }}-{{ ansible_distribution_version }}.yml"
-        - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
-        - '{{ ansible_distribution }}.yml'
-        - '{{ ansible_os_family }}.yml'
+        - "{{ ansible_facts['distribution'] }}-{{ ansible_facts['distribution_version'] }}.yml"
+        - "{{ ansible_facts['distribution'] }}-{{ ansible_facts['distribution_major_version'] }}.yml"
+        - "{{ ansible_facts['distribution'] }}.yml"
+        - "{{ ansible_facts['os_family'] }}.yml"
       paths:
         - 'vars'
 
@@ -25,10 +25,10 @@
   ansible.builtin.set_fact:
     is_container: true
   when: >
-    (ansible_virtualization_type is defined and
-      (ansible_virtualization_type == "docker"
-       or ansible_virtualization_type == "containerd"
-       or ansible_virtualization_type == "container"
+    (ansible_facts['virtualization_type'] is defined and
+      (ansible_facts['virtualization_type'] == "docker"
+       or ansible_facts['virtualization_type'] == "containerd"
+       or ansible_facts['virtualization_type'] == "container"
       )
     )
 
@@ -36,7 +36,7 @@
   ansible.builtin.apt:
     update_cache: yes
     cache_valid_time: 3600
-  when: ansible_os_family == 'Debian'
+  when: ansible_facts['os_family'] == 'Debian'
   register: pkg_result
   until: pkg_result is success
 
