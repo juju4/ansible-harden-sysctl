@@ -14,19 +14,19 @@
       ansible.builtin.package:
         name: procps-ng
         state: present
-      when: ansible_os_family == "RedHat" and ansible_distribution_major_version | int >= 8
+      when: ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version'] | int >= 8
     - name: Debian | update cache
       ansible.builtin.apt:
         update_cache: yes
         cache_valid_time: 3600
-      when: ansible_os_family == 'Debian'
+      when: ansible_facts['os_family'] == 'Debian'
       register: pkg_result
       until: pkg_result is success
     - name: Debian | Ensure sysctl is present
       ansible.builtin.package:
         name: procps
         state: present
-      when: ansible_os_family == "Debian"
+      when: ansible_facts['os_family'] == "Debian"
   tasks:
     - name: Check sysctl values
       ansible.builtin.command: "sysctl {{ item.n }}"
@@ -50,7 +50,7 @@
     - name: Validate /etc/rc.local properties
       ansible.builtin.assert:
         that: rclocalp.stat.mode == '0755'
-      when: ansible_service_mgr == 'systemd' and ansible_os_family == "Debian"
+      when: ansible_facts['service_mgr'] == 'systemd' and ansible_facts['os_family'] == "Debian"
     - name: Fetch content of /etc/rc.local
       ansible.builtin.slurp:
         src: /etc/rc.local
