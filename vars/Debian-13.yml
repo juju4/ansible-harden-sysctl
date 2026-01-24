@@ -16,7 +16,7 @@ harden_sysctl_distribution:
   - { n: 'fs.protected_symlinks', v: 1 }
   - { n: 'fs.protected_hardlinks', v: 1 }
   - { n: 'vm.mmap_min_addr', v: 65536 }
-  - { n: 'kernel.pid_max', v: "{% if ansible_userspace_bits == '32' %}32768{% else %}65536{% endif %}" }
+  - { n: 'kernel.pid_max', v: "{% if ansible_facts.userspace_bits == '32' %}32768{% else %}65536{% endif %}" }
   ## restrict access to perf subsystem
   - { n: 'kernel.perf_event_paranoid', v: 2 }
   - { n: 'kernel.perf_event_max_sample_rate', v: 1 }

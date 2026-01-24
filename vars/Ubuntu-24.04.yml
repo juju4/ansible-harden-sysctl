@@ -18,7 +18,7 @@ harden_sysctl_distribution:
   - { n: 'fs.protected_fifos', v: 2 }
   - { n: 'fs.protected_regular', v: 2 }
   - { n: 'vm.mmap_min_addr', v: 65536 }
-  - { n: 'kernel.pid_max', v: "{% if ansible_userspace_bits == '32' %}32768{% else %}65536{% endif %}" }
+  - { n: 'kernel.pid_max', v: "{% if ansible_facts.userspace_bits == '32' %}32768{% else %}65536{% endif %}" }
   ## restrict access to perf subsystem
   # https://docs.kernel.org/admin-guide/perf-security.html?highlight=perf_event_paranoid
   # https://linuxsecurity.expert/kb/sysctl/kernel_perf_event_paranoid/
