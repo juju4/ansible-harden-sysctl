@@ -13,12 +13,11 @@ harden_sysctl_kernel_modules_disabled_sysctl: false
 harden_sysctl_kernel_modules_disabled_afterboot: true
 ## minimal iptables modules
 hardensysctl_kernel_modules:
-  - falco
   - ip_tables
   - iptable_filter
   - nf_log_ipv4
-  - nf_log_common
-  - nf_conntrack_ipv4
+  # - nf_log_common
+  # - nf_conntrack_ipv4
   - nf_defrag_ipv4
   - nf_conntrack
   - nf_nat
