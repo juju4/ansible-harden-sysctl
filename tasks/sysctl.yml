@@ -194,3 +194,43 @@
           ansible.builtin.service:
             name: rc-local
             enabled: yes
+      rescue:
+        - name: Import immutable
+          ansible.builtin.import_tasks: immutable.yml
+          vars:
+            target_dir: /etc/systemd/system
+            state: pre
+        - name: Import immutable
+          ansible.builtin.import_tasks: immutable.yml
+          vars:
+            target_dir: "/etc/systemd/system/rc-local.service.d"
+            state: pre
+        - name: Import immutable
+          ansible.builtin.import_tasks: immutable.yml
+          vars:
+            target_dir: "/etc/systemd/system/rc-local.service.d/install.conf"
+            state: pre
+        - name: Ensure systemd rc-local override directory exists (immutable)
+          ansible.builtin.file:
+            path: /etc/systemd/system/rc-local.service.d
+            state: directory
+            mode: '0755'
+        - name: Ensure systemd rc-local has an install section (immutable)
+          ansible.builtin.template:
+            src: systemd-rc-local.conf.j2
+            dest: /etc/systemd/system/rc-local.service.d/install.conf
+            mode: '0644'
+        - name: Enabling rc.local with systemd (immutable)
+          ansible.builtin.service:
+            name: rc-local
+            enabled: yes
+        - name: Import immutable
+          ansible.builtin.import_tasks: immutable.yml
+          vars:
+            target_dir: /etc/systemd/system
+            state: post
+        - name: Import immutable
+          ansible.builtin.import_tasks: immutable.yml
+          vars:
+            target_dir: "/etc/systemd/system/rc-local.service.d/install.conf"
+            state: post
