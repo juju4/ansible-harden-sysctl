@@ -34,10 +34,10 @@ jobs:
             experimental: false
             suite: default
           - molecule_distro: 'ubuntu:26.04'
-            experimental: true
+            experimental: false
             suite: default
           - molecule_distro: 'ubuntu:24.04'
-            experimental: true
+            experimental: false
             suite: default
           - molecule_distro: 'debian:13'
             experimental: false
