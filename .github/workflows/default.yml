@@ -7,6 +7,11 @@ on:
   workflow_dispatch:
   schedule:  # run weekly, every monday 03:00
     - cron: '0 3 * * 1'
+  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 
 permissions: {}
 
@@ -22,20 +27,29 @@ jobs:
       max-parallel: 4
       matrix:
         include:
+          - molecule_distro: 'almalinux:10-kitten'
+            experimental: false
+            suite: default
           - molecule_distro: 'rockylinux:9'
             experimental: false
+            suite: default
           - molecule_distro: 'ubuntu:26.04'
             experimental: true
+            suite: default
           - molecule_distro: 'ubuntu:24.04'
             experimental: true
+            suite: default
+          - molecule_distro: 'debian:13'
+            experimental: false
+            suite: default
           - molecule_distro: 'debian:12'
             experimental: false
-          - molecule_distro: 'debian:11'
-            experimental: false
+            suite: default
     env:
       ANSIBLE_CALLBACKS_ENABLED: profile_tasks
       MOLECULE_NO_LOG: "false"
       ANSIBLE_ROLE: juju4.harden_sysctl
+      ANSIBLE_SUITE: ${{ matrix.suite }}
 
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
@@ -45,11 +59,23 @@ jobs:
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: '3.13'
+      - name: Cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9  # v6.1.0
+        with:
+          path: |
+            /var/cache/apt/archives
+            /var/lib/apt
+            /var/_install
+            /home/runner/.ansible
+            /home/runner/.cache/molecule
+          key: cache-ansible-${{ env.ANSIBLE_ROLE }}-${{ steps.get-date.outputs.date }}
       - name: Install dependencies
         run: |
+          set -x
           python -m pip install --upgrade pip
-          pip install molecule[docker] ansible-lint flake8 testinfra ansible
-          mkdir -p $HOME/.ansible/roles && ln -s $GITHUB_WORKSPACE/$ANSIBLE_ROLE $HOME/.ansible/roles/
+          pip install molecule molecule-plugins docker ansible-lint flake8 testinfra ansible
+          mkdir -p $HOME/.ansible/roles && ln -s $GITHUB_WORKSPACE/$ANSIBLE_ROLE $HOME/.ansible/roles/ || true
+          [ -f molecule/${ANSIBLE_SUITE}/requirements.yml ] && ansible-galaxy install -r molecule/${ANSIBLE_SUITE}/requirements.yml || true
       - name: Fetch central settings repository
         run: |
           export settings_repo="https://raw.githubusercontent.com/juju4/ansible-ci-settings/main"
@@ -64,17 +90,31 @@ jobs:
         continue-on-error: true
       - name: Environment
         run: |
+          set -x
+          ansible --version
+          ansible-config dump --only-changed -t all
+          ansible-galaxy collection list || true
+          ansible-galaxy role list || true
           pwd
           env
-          find -ls
+          find . -ls
       - name: Galaxy dependencies
         run: |
-          cd $GITHUB_WORKSPACE/$ANSIBLE_ROLE && ansible-galaxy install --timeout 120 --verbose -r molecule/default/requirements.yml
+          cd $GITHUB_WORKSPACE/$ANSIBLE_ROLE && ansible-galaxy install --timeout 120 --verbose -r molecule/$ANSIBLE_SUITE/requirements.yml
         continue-on-error: true
       - name: run test
         run: |
-          cd $GITHUB_WORKSPACE/$ANSIBLE_ROLE && molecule test
+          cd $GITHUB_WORKSPACE/$ANSIBLE_ROLE && molecule test --scenario-name ${ANSIBLE_SUITE}
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ${{ matrix.molecule_distro }}
+      - name: After script | Environment
+        run: |
+          set -x
+          ansible --version
+          ansible-config dump --only-changed -t all
+          ansible-galaxy collection list || true
+          ansible-galaxy role list || true
+        if: ${{ always() }}
+        continue-on-error: true
