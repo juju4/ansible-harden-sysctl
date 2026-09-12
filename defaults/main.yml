@@ -1,5 +1,8 @@
 ---
 
+# harden_sysctl_file: /etc/sysctl.conf
+harden_sysctl_file: /etc/sysctl.d/10-harden-local.conf
+harden_sysctl_forward_file: /etc/sysctl.d/10-forwarding-local.conf
 harden_sysctl_use_forwarding: false
 harden_sysctl_ping_group_range: '0  2147483647'
 

@@ -31,6 +31,7 @@
     name: "{{ item.n }}"
     value: "{{ item.v }}"
     sysctl_set: yes
+    sysctl_file: "{{ harden_sysctl_file }}"
     state: present
     reload: yes
   with_items: "{{ harden_sysctl_network_settings }}"
@@ -49,6 +50,7 @@
         name: "{{ item.n }}"
         value: "{{ item.v }}"
         sysctl_set: yes
+        sysctl_file: "{{ harden_sysctl_file }}"
         state: present
         reload: yes
       with_items:
@@ -64,6 +66,7 @@
         name: "{{ item.n }}"
         value: "{{ item.v }}"
         sysctl_set: yes
+        sysctl_file: "{{ harden_sysctl_file }}"
         state: present
         reload: yes
       with_items:
@@ -83,6 +86,7 @@
             name: "{{ item.n }}"
             value: "{{ item.v }}"
             sysctl_set: yes
+            sysctl_file: "{{ harden_sysctl_file }}"
             state: present
             reload: yes
           with_items: "{{ harden_sysctl_distribution }}"
@@ -99,6 +103,7 @@
         name: "{{ item.n }}"
         value: "{{ item.v }}"
         sysctl_set: yes
+        sysctl_file: "{{ harden_sysctl_forward_file }}"
         state: present
         reload: yes
       with_items:
@@ -114,6 +119,7 @@
         name: "{{ item.n }}"
         value: "{{ item.v }}"
         sysctl_set: yes
+        sysctl_file: "{{ harden_sysctl_forward_file }}"
         state: present
         reload: yes
       with_items:
@@ -137,6 +143,7 @@
     name: "{{ item.n }}"
     value: "{{ item.v }}"
     sysctl_set: yes
+    sysctl_file: "{{ harden_sysctl_file }}"
     state: present
     reload: yes
   with_items:
@@ -156,6 +163,7 @@
     name: "kernel.modules_disabled"
     value: 1
     sysctl_set: yes
+    sysctl_file: "{{ harden_sysctl_file }}"
     state: present
     reload: yes
   when: harden_sysctl_kernel_modules_disabled_sysctl is defined and harden_sysctl_kernel_modules_disabled_sysctl
